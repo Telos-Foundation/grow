@@ -28,7 +28,7 @@ class tlos_wallet:
             self.create()
 
     def exists(self):
-        return os.path.isdir(self.wallet_dir)
+        return os.path.isdir(self.wallet_dir) and os.path.isdir(os.path.join(os.path.expanduser('~'), 'telos-wallet'))
 
     def create(self):
         print "creating wallet"
@@ -102,7 +102,7 @@ class tlos_wallet:
             return { "private" : private, "public" : public }
         except ValueError as e:
             print ('Error occured while attempting to parse wallet password! Message: %s' % e.message)
-            
+
     def import_key(self, private_key):
         run(self.teclos_start + ' wallet import %s' % (private_key))
 

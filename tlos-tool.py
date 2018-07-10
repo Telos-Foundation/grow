@@ -255,8 +255,12 @@ def delete_all_nodes():
 def reset():
     delete_all_nodes()
     run_continue('pkill -f keosd')
-    rmtree(os.path.join(os.path.expanduser('~'), 'telos-wallet'))
-    rmtree(os.path.join(parent_dir, 'wallet'))
+    dir = os.path.join(os.path.expanduser('~'), 'telos-wallet')
+    if os.path.isdir(dir):
+        rmtree(dir)
+    dir = os.path.join(parent_dir, 'wallet')
+    if os.path.isdir(dir):
+        rmtree(dir)
 #endregion
 
 parser = argparse.ArgumentParser(description='This is the EOSIO boot strap for full-node deployment')
