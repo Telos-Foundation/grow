@@ -1,0 +1,6 @@
+*.pyc
+/eos
+/telos
+/blocks
+/en-*
+wallet
