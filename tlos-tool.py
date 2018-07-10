@@ -34,13 +34,13 @@ def reset_cwd():
 #endregion
 
 def get_repository():
-    abs_path = os.path.abspath(eos_dir)
-    if os.path.exists(abs_path):
+    
+    if os.path.exists(eos_dir):
         print "Path exists."
         return
-    run(['git clone %s --recursive' % telos_repo_url, '--directory ', abs_path])
-    print 'changing to eos directory: ' + abs_path
-    os.chdir(abs_path)
+    run(['git clone %s --recursive' % telos_repo_url, '--directory ', eos_dir])
+    print 'changing to eos directory: ' + eos_dir
+    os.chdir(eos_dir)
     if args.tag_name != "":
         run(['git', 'checkout', '-f', args.tag_name], False)
     run('git submodule update --init --recursive')
@@ -48,10 +48,9 @@ def get_repository():
     build_eos()
 
 def build_eos():
-    abs_path = os.path.abspath(eos_dir)
-    os.chdir(abs_path)
+    os.chdir(eos_dir)
     run(['./eosio_build.sh -s %s' % (args.symbol)])
-    os.chdir(os.path.join(abs_path, "build"))
+    os.chdir(os.path.join(eos_dir, "build"))
     print "Compiling executables and binaries... You may need to enter your password."
     run('sudo make install')
     reset_cwd()
@@ -188,26 +187,22 @@ def transfer(sender, receipient, amount, memo = ""):
 
 #region node management
 def start_full():
-    print "start_full()"
-    folder = 'en-full-node'
-    run('mkdir ' + folder)
-    dir = os.path.abspath('./' + folder)
-    copyfile('./config/full_config.ini', os.path.join(dir, 'config.ini'))
-    copyfile('./config/genesis.json', os.path.join(dir, "genesis.json"))
+    dir = os.path.join(start_cwd, 'en-full-node')
+    os.makedirs(dir)
+    copyfile(os.path.join(parent_dir, 'config/full_config.ini'), os.path.join(dir, 'config.ini'))
+    copyfile(os.path.join(parent_dir, 'config/genesis.json'), os.path.join(dir, "genesis.json"))
     os.chdir(dir)
-    start_background_proc(build_full_node_cmd(dir), log_file("stderr.txt"))
+    start_background_proc(build_full_node_cmd(dir), log_file(os.path.join(start_cwd, os.path.join(dir, 'stderr.txt'))))
     reset_cwd()
 
 
 def start_node(node_index, account):
-    print "start_node()"
-    folder =  'en-' + str(node_index) + '_' + account['name']
-    run('mkdir ' + folder)
-    dir = os.path.abspath("./" + folder)
-    copyfile("./config/test_config.ini", os.path.join(dir, "config.ini"))
-    copyfile("./config/genesis.json", os.path.join(dir, "genesis.json"))
+    dir =  os.path.join(start_cwd, 'en-' + str(node_index) + '_' + account['name'])
+    os.makedirs(dir)
+    copyfile(os.path.join(parent_dir, "config/test_config.ini"), os.path.join(dir, "config.ini"))
+    copyfile(os.path.join(parent_dir, "config/genesis.json"), os.path.join(dir, "genesis.json"))
     os.chdir(dir)
-    start_background_proc(build_private_node_cmd(node_index, account, dir), log_file("stderr.txt"))
+    start_background_proc(build_private_node_cmd(node_index, account, dir), log_file(os.path.join(start_cwd, os.path.join(dir, 'stderr.txt'))))
     reset_cwd()
 
 def build_full_node_cmd(path):
@@ -219,7 +214,6 @@ def build_full_node_cmd(path):
     return cmd
 
 def build_private_node_cmd(node_index, account, path):
-    print "build_node_cmd()"
     otherOpts = ' --p2p-peer-address localhost:9876'.join(list(map(lambda i: '    --p2p-peer-address localhost:' + str(9000 + i), range(node_index))))
     cmd = nodeos_dir + " --config-dir " + path
     cmd += " --genesis-json " + os.path.join(path, "genesis.json")
@@ -234,7 +228,6 @@ def build_private_node_cmd(node_index, account, path):
     return cmd
 
 def start_all_nodes(accounts):
-    print "start_all_nodes()"
     i = 0
     for a in accounts:
         start_node(i, a)
@@ -252,8 +245,8 @@ def delete_all_nodes():
 def reset():
     delete_all_nodes()
     run_continue('pkill -f keosd')
-    run('rm -rf ~/telos-wallet/')
-    run('rm -rf ./wallet')
+    rmtree(os.path.join(os.path.expanduser('~'), 'telos-wallet'))
+    rmtree(os.path.join(parent_dir, 'wallet'))
 #endregion
 
 parser = argparse.ArgumentParser(description='This is the EOSIO boot strap for full-node deployment')
@@ -280,21 +273,24 @@ parser.add_argument('--reset', action="store_true", help="Deletes all running no
 
 args = parser.parse_args()
 
+this_file_dir = os.path.realpath(__file__)
+parent_dir = os.path.abspath(os.path.join(this_file_dir, os.pardir))
+print parent_dir
 start_cwd = os.getcwd()
+
 telos_repo_url = "https://github.com/Telos-Foundation/telos.git"
-contracts = "build/contracts"
+
 folder_scheme = "en-"
-jsonConfig = json.loads(file_get_contents("config/config.json"))
+jsonConfig = json.loads(file_get_contents(os.path.join(parent_dir, "config/config.json")))
 host_address = jsonConfig['node_address'] if 'node_address' in jsonConfig and jsonConfig['node_address'] == "" else "http://localhost:8888"
-wallet_dir = os.path.abspath(jsonConfig['wallet-dir'])
+wallet_dir = os.path.join(parent_dir, 'wallet')
 eos_dir = os.path.abspath(args.eos_dir) if jsonConfig['eos-source-dir'] == "" else os.path.abspath(jsonConfig['eos-source-dir'])
+contracts = "build/contracts"
 keosd_dir = os.path.join(eos_dir, "build/programs/keosd/keosd")
 teclos_dir = os.path.join(eos_dir, "build/programs/teclos/teclos")
 nodeos_dir = os.path.join(eos_dir, "build/programs/nodeos/nodeos")
 systemAccounts = jsonConfig['system-accounts']
 systemContracts = jsonConfig['system-contracts']
-this_file_dir = os.path.realpath(__file__)
-
 
 if args.reset:
     reset()
@@ -364,4 +360,4 @@ if args.private_test:
     time.sleep(60)
     resign_all()
 
-create_file('./config/config.json', json.dumps(jsonConfig))
+create_file(os.path.join(parent_dir, 'config/config.json'), json.dumps(jsonConfig))

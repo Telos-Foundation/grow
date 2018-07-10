@@ -107,7 +107,8 @@ class tlos_wallet:
             sys.exit(1)
 
     def start_wallet(self):
-        start_background_proc(self.keosd_dir + ' --unlock-timeout %d --http-server-address 127.0.0.1:8900' % (self.unlockTimeout), log_file('stderr.txt'))
+        os.makedirs(self.wallet_dir)
+        start_background_proc(self.keosd_dir + ' --unlock-timeout %d --http-server-address 127.0.0.1:8900' % (self.unlockTimeout), log_file(os.path.join(self.wallet_dir, 'stderr.txt')), os.path.join(self.wallet_dir, 'keosd.pid'))
         sleep(.4)
 
     def get_pw(self):

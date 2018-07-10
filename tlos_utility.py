@@ -53,12 +53,12 @@ def get_output(args):
     proc = subprocess.Popen(args, shell=True, stdout=subprocess.PIPE)
     return proc.communicate()[0].decode('utf-8')
 
-def start_background_proc(args, file):
+def start_background_proc(args, file, path = './nodeos.pid'):
     print args
     p = subprocess.Popen(args,
         stdout=file,
         stderr=file, shell=True)
-    create_file("nodeos.pid", p.pid)
+    create_file(path, p.pid)
 
 def background(args):
     return subprocess.Popen(args, shell=True)
