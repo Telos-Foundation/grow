@@ -195,6 +195,12 @@ def start_full():
     start_background_proc(build_full_node_cmd(dir), log_file(os.path.join(start_cwd, os.path.join(dir, 'stderr.txt'))))
     reset_cwd()
 
+def restart_full():
+    dir = os.path.join(start_cwd, 'en-full-node')
+    os.chdir(dir)
+    cmd = build_full_node_cmd(dir)
+    cmd += " --hard-replay-blockchain"
+    start_background_proc(cmd, log_file(os.path.join(start_cwd, os.path.join(dir, 'stderr.txt'))))
 
 def start_node(node_index, account):
     dir =  os.path.join(start_cwd, 'en-' + str(node_index) + '_' + account['name'])
@@ -209,7 +215,6 @@ def build_full_node_cmd(path):
     cmd = nodeos_dir + ' --blocks-dir %s' % (os.path.join(path, "blocks"))
     cmd += " --config-dir %s" % (path)
     cmd += " --genesis-json %s" % os.path.join(path, "genesis.json")
-    cmd += " --delete-all-blocks"
     cmd += " --hard-replay-blockchain"
     return cmd
 
@@ -322,9 +327,12 @@ if args.start_full:
     wallet.unlock()
     if not wallet.contains_key(args.private_key):
         wallet.import_key(args.private_key)
-    start_full()
-    time.sleep(10)
-    args.boot_strap = True
+    if not os.path.isdir(os.path.join(start_cwd, "en-full-node")):
+        start_full()
+        time.sleep(10)
+        args.boot_strap = True
+    else:
+        restart_full()
 
 if 'start_single' in args and args.start_single != "" and args.start_single != None:
     print "start_single()"
