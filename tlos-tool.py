@@ -34,7 +34,6 @@ def reset_cwd():
 #endregion
 
 def get_repository():
-    
     if os.path.exists(eos_dir):
         print "Path exists."
         return
@@ -187,19 +186,26 @@ def transfer(sender, receipient, amount, memo = ""):
 
 #region node management
 def start_full():
-    dir = os.path.join(start_cwd, 'en-full-node')
-    os.makedirs(dir)
-    copyfile(os.path.join(parent_dir, 'config/full_config.ini'), os.path.join(dir, 'config.ini'))
-    copyfile(os.path.join(parent_dir, 'config/genesis.json'), os.path.join(dir, "genesis.json"))
-    os.chdir(dir)
-    start_background_proc(build_full_node_cmd(dir), log_file(os.path.join(start_cwd, os.path.join(dir, 'stderr.txt'))))
-    reset_cwd()
+    print "start_full()"
+    try:
+        dir = os.path.join(start_cwd, 'en-full-node')
+        os.makedirs(dir)
+        copyfile(os.path.join(parent_dir, 'config/full_config.ini'), os.path.join(dir, 'config.ini'))
+        copyfile(os.path.join(parent_dir, 'config/genesis.json'), os.path.join(dir, "genesis.json"))
+        os.chdir(dir)
+        cmd = build_full_node_cmd(dir)
+        cmd += ' --delete-all-blocks'
+        cmd += " --genesis-json %s" % os.path.join(dir, "genesis.json")
+        start_background_proc(cmd, log_file(os.path.join(start_cwd, os.path.join(dir, 'stderr.txt'))))
+        reset_cwd()
+    except OSError as e:
+        print ('Error occurred while attempting to get configuration file! Message: %s' % e.message)
 
 def restart_full():
+    print "restart_full()"
     dir = os.path.join(start_cwd, 'en-full-node')
     os.chdir(dir)
     cmd = build_full_node_cmd(dir)
-    cmd += " --hard-replay-blockchain"
     start_background_proc(cmd, log_file(os.path.join(start_cwd, os.path.join(dir, 'stderr.txt'))))
 
 def start_node(node_index, account):
@@ -214,7 +220,6 @@ def start_node(node_index, account):
 def build_full_node_cmd(path):
     cmd = nodeos_dir + ' --blocks-dir %s' % (os.path.join(path, "blocks"))
     cmd += " --config-dir %s" % (path)
-    cmd += " --genesis-json %s" % os.path.join(path, "genesis.json")
     cmd += " --hard-replay-blockchain"
     return cmd
 
@@ -280,7 +285,6 @@ args = parser.parse_args()
 
 this_file_dir = os.path.realpath(__file__)
 parent_dir = os.path.abspath(os.path.join(this_file_dir, os.pardir))
-print parent_dir
 start_cwd = os.getcwd()
 
 telos_repo_url = "https://github.com/Telos-Foundation/telos.git"
@@ -289,7 +293,7 @@ folder_scheme = "en-"
 jsonConfig = json.loads(file_get_contents(os.path.join(parent_dir, "config/config.json")))
 host_address = jsonConfig['node_address'] if 'node_address' in jsonConfig and jsonConfig['node_address'] == "" else "http://localhost:8888"
 wallet_dir = os.path.join(parent_dir, 'wallet')
-eos_dir = os.path.abspath(args.eos_dir) if jsonConfig['eos-source-dir'] == "" else os.path.abspath(jsonConfig['eos-source-dir'])
+eos_dir = os.path.abspath(args.eos_dir) if 'eos-source-dir' not in jsonConfig or jsonConfig['eos-source-dir'] == "" else os.path.abspath(jsonConfig['eos-source-dir'])
 contracts = "build/contracts"
 keosd_dir = os.path.join(eos_dir, "build/programs/keosd/keosd")
 teclos_dir = os.path.join(eos_dir, "build/programs/teclos/teclos")

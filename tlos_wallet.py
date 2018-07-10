@@ -24,7 +24,7 @@ class tlos_wallet:
         self.keosd_dir = keosd_dir
         self.teclos_start = "%s --wallet-url %s" % (teclos_dir, self.wallet_address)
         self.unlockTimeout = unlockTimeout
-        if not self.exists() and os.path.isdir(eos_dir):
+        if not self.exists() and os.path.isfile(teclos_dir):
             self.create()
 
     def exists(self):
@@ -55,25 +55,34 @@ class tlos_wallet:
             run(self.teclos_start + ' wallet lock')
 
     def is_locked(self):
-        o = get_output(self.teclos_start + ' wallet list')
-        j = o[o.index(':') + 2:len(o)]
-        for wallet in j:
-            if 'default' in wallet and '*' in wallet:
-                return True
-        return False
+        try:
+            o = get_output(self.teclos_start + ' wallet list')
+            j = o[o.index(':') + 2:len(o)]
+            for wallet in j:
+                if 'default' in wallet and '*' in wallet:
+                    return True
+            return False
+        except ValueError as e:
+            print ('Error occured while attempting to parse wallet password! Message: %s' % e.message)
+        except OSError as e:
+            print ('Error occured while attempting to get file! %s' % e.message)
 
     def get_keys(self):
-        if self.is_locked():
-            self.unlock()
-        o = get_output(self.teclos_start + ' wallet private_keys --password %s' % self.get_pw())
-        j = json.loads(o)
-        output = []
-        for keypair in j:
-            d = {}
-            d['public'] = keypair[0]
-            d['private'] = keypair[1]
-            output.append(d)
-        return output
+        try:
+            if self.is_locked():
+                self.unlock()
+            o = get_output(self.teclos_start + ' wallet private_keys --password %s' % self.get_pw())
+            j = json.loads(o)
+            output = []
+            for keypair in j:
+                d = {}
+                d['public'] = keypair[0]
+                d['private'] = keypair[1]
+                output.append(d)
+            return output
+        except OSError as e:
+            print ('Error occured while attempting to get file! %s' % e.message)
+        
 
     def contains_key(self, key):
         if self.is_locked():
@@ -86,11 +95,14 @@ class tlos_wallet:
         return False
 
     def create_key(self):
-        o =  filter(None, get_output(self.teclos_dir + ' create key').split("\n"))
-        private = o[0][o[0].index(':') + 2:len(o[0])]
-        public = o[1][o[1].index(':') + 2:len(o[1])]
-        return { "private" : private, "public" : public }
-
+        try:
+            o =  filter(None, get_output(self.teclos_dir + ' create key').split("\n"))
+            private = o[0][o[0].index(':') + 2:len(o[0])]
+            public = o[1][o[1].index(':') + 2:len(o[1])]
+            return { "private" : private, "public" : public }
+        except ValueError as e:
+            print ('Error occured while attempting to parse wallet password! Message: %s' % e.message)
+            
     def import_key(self, private_key):
         run(self.teclos_start + ' wallet import %s' % (private_key))
 
