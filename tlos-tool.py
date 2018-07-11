@@ -297,8 +297,16 @@ folder_scheme = "en-"
 jsonConfig = json.loads(file_get_contents(os.path.join(parent_dir, "config/config.json")))
 host_address = jsonConfig['node_address'] if 'node_address' in jsonConfig and jsonConfig['node_address'] == "" else "http://localhost:8888"
 wallet_dir = os.path.join(parent_dir, 'wallet')
-eos_dir = os.path.abspath(args.eos_dir) if 'eos-source-dir' not in jsonConfig or jsonConfig['eos-source-dir'] == "" else os.path.abspath(jsonConfig['eos-source-dir'])
+
+eos_dir = ""
+if args.eos_dir != 'telos':
+    eos_dir = os.path.abspath(args.eos_dir)
+elif 'eos-source-dir' in jsonConfig or jsonConfig['eos-source-dir'] != "":
+    eos_dir = os.path.abspath(jsonConfig['eos-source-dir'])
 jsonConfig['eos-source-dir'] = eos_dir
+
+print eos_dir
+
 contracts = "build/contracts"
 keosd_dir = os.path.join(eos_dir, "build/programs/keosd/keosd")
 teclos_dir = os.path.join(eos_dir, "build/programs/teclos/teclos")
