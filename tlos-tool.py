@@ -34,20 +34,22 @@ def reset_cwd():
 #endregion
 
 def get_repository():
-    print eos_dir
-    if os.path.exists(eos_dir):
-        print "Path exists."
-        return
-    dir = os.path.abspath(os.path.join(eos_dir, '..'))
-    os.chdir(dir)
-    run(['git clone %s --recursive' % telos_repo_url])
-    print 'changing to eos directory: ' + eos_dir
-    os.chdir(eos_dir)
-    if args.tag_name != "":
-        run(['git', 'checkout', '-f', args.tag_name], False)
-    run('git submodule update --init --recursive')
-    reset_cwd()
-    build_eos()
+    try:
+        if os.path.exists(eos_dir):
+            print "Path exists."
+            return
+        dir = os.path.abspath(os.path.join(eos_dir, '..'))
+        os.chdir(dir)
+        run(['git clone %s --recursive' % telos_repo_url])
+        print 'changing to eos directory: ' + eos_dir
+        os.chdir(eos_dir)
+        if args.tag_name != "":
+            run(['git', 'checkout', '-f', args.tag_name], False)
+        run('git submodule update --init --recursive')
+        reset_cwd()
+        build_eos()
+    except OSError as e:
+        raise  OSError("Error occured while trying to pull repo. Message: %s" % e.message)
 
 def build_eos():
     os.chdir(eos_dir)
@@ -93,8 +95,7 @@ def create_accounts_from_csv(path_to_csv):
                 else:
                     print (cpu + net + liquid) + ' != ' 
     except Exception as e:
-        print "unable to parse csv and create accounts"
-        print e.message
+        raise ValueError('unable to parse csv snapshot', e.message)
 
 def create_staked_account(a, net, cpu, ram):
     cmd = teclos_dir + ' system newaccount eosio --transfer %s %s --stake-net \"%s\" --stake-cpu \"%s\" --buy-ram \"%s\"'
@@ -256,14 +257,17 @@ def delete_all_nodes():
             rmtree(dir)
 
 def reset():
-    delete_all_nodes()
-    run_continue('pkill -f keosd')
-    dir = os.path.join(os.path.expanduser('~'), 'telos-wallet')
-    if os.path.isdir(dir):
-        rmtree(dir)
-    dir = os.path.join(parent_dir, 'wallet')
-    if os.path.isdir(dir):
-        rmtree(dir)
+    try:
+        delete_all_nodes()
+        run_continue('pkill -f keosd')
+        dir = os.path.join(os.path.expanduser('~'), 'telos-wallet')
+        if os.path.isdir(dir):
+            rmtree(dir)
+        dir = os.path.join(parent_dir, 'wallet')
+        if os.path.isdir(dir):
+            rmtree(dir)
+    except OSError as e:
+        raise OSError('Unable to finde telos-wallet or wallet while resetting', e.message)
 #endregion
 
 parser = argparse.ArgumentParser(description='This is the EOSIO boot strap for full-node deployment')
@@ -321,70 +325,71 @@ if args.reset:
 
 wallet = tlos_wallet(wallet_dir, teclos_dir, eos_dir, keosd_dir, 999999999)
 
-if args.pull_repo:
-    get_repository()
 
-if args.rebuild_eos:
-    build_eos()
+try:
+    if args.pull_repo:
+        get_repository()
 
-if not os.path.isdir(eos_dir):
-    print "EOS software does not appear to be installed"
-    sys.exit(1)
+    if os.path.isdir(eos_dir):
+        if args.rebuild_eos:
+            build_eos()
 
-if args.unlock_wallet:
-    wallet.unlock()
+        if args.unlock_wallet:
+            wallet.unlock()
 
-if args.lock_wallet:
-    wallet.lock()
+        if args.lock_wallet:
+            wallet.lock()
 
-if 'create_account' in args and args.create_account != "" and args.create_account != None:
-    wallet.unlock()
-    print json.dumps(create_account_obj(args.create_account))
+        if 'create_account' in args and args.create_account != "" and args.create_account != None:
+            wallet.unlock()
+            print json.dumps(create_account_obj(args.create_account))
 
-if args.start_full:
-    wallet.unlock()
-    if not wallet.contains_key(args.private_key):
-        wallet.import_key(args.private_key)
-    if not os.path.isdir(os.path.join(start_cwd, "en-full-node")):
-        start_full()
-        time.sleep(10)
-        args.boot_strap = True
-    else:
-        restart_full()
+        if args.start_full:
+            wallet.unlock()
+            if not wallet.contains_key(args.private_key):
+                wallet.import_key(args.private_key)
+            if not os.path.isdir(os.path.join(start_cwd, "en-full-node")):
+                start_full()
+                time.sleep(10)
+                args.boot_strap = True
+            else:
+                restart_full()
 
-if 'start_single' in args and args.start_single != "" and args.start_single != None:
-    print "start_single()"
-    print jsonConfig['node_index']
+        if 'start_single' in args and args.start_single != "" and args.start_single != None:
+            print "start_single()"
+            print jsonConfig['node_index']
 
-if args.boot_strap:
-    wallet.unlock()
-    if not wallet.contains_key(args.private_key):
-        wallet.import_key(args.private_key)
-    system_accounts = create_system_accounts(systemAccounts)
-    set_system_contracts(systemContracts)
-    issue_token(args.token_supply, args.token_issue)
-    system_contract = os.path.join(os.path.join(eos_dir, contracts), 'eosio.system')
-    run(teclos_dir + ' set contract eosio %s -p eosio' % (system_contract)) 
-    run(teclos_dir + ' push action eosio setpriv \'[\"eosio.msig\", 1]\' -p eosio@active')
-    if args.fund_account:
-        print "Creating fund account"
-        fund_account = create_account_obj('telosfundacc')
-        create_staked_account(fund_account, Asset(1000.0000), Asset(1000.0000), Asset(1000.0000))
-        transfer('eosio', fund_account['name'], str(args.token_issue * 0.15), "Sending 15 percent stake and enough money to create new accounts")
+        if args.boot_strap:
+            wallet.unlock()
+            if not wallet.contains_key(args.private_key):
+                wallet.import_key(args.private_key)
+            system_accounts = create_system_accounts(systemAccounts)
+            set_system_contracts(systemContracts)
+            issue_token(args.token_supply, args.token_issue)
+            system_contract = os.path.join(os.path.join(eos_dir, contracts), 'eosio.system')
+            run(teclos_dir + ' set contract eosio %s -p eosio' % (system_contract)) 
+            run(teclos_dir + ' push action eosio setpriv \'[\"eosio.msig\", 1]\' -p eosio@active')
+            if args.fund_account:
+                print "Creating fund account"
+                fund_account = create_account_obj('telosfundacc')
+                create_staked_account(fund_account, Asset(1000.0000), Asset(1000.0000), Asset(1000.0000))
+                transfer('eosio', fund_account['name'], str(args.token_issue * 0.15), "Sending 15 percent stake and enough money to create new accounts")
 
-if 'snapshot' in args and args.snapshot != "" and args.snapshot != None:
-    if os.path.isfile(args.snapshot):
-        create_accounts_from_csv(args.snapshot)
+        if 'snapshot' in args and args.snapshot != "" and args.snapshot != None:
+            if os.path.isfile(args.snapshot):
+                create_accounts_from_csv(args.snapshot)
 
-if args.private_test:
-    producer_accounts = create_random_accounts(21, (args.token_issue * 0.01), (args.token_issue * 0.02), "prodname")
-    normal_accounts = create_random_accounts(30, (args.token_issue * 0.01), (args.token_issue * 0.02))
-    jsonConfig['node_index'] = 30 - 1
-    reg_producers(producer_accounts)
-    start_all_nodes(producer_accounts)
-    vote_producers(producer_accounts, producer_accounts)
-    vote_producers(normal_accounts, producer_accounts)
-    time.sleep(60)
-    resign_all()
-
-create_file(os.path.join(parent_dir, 'config/config.json'), json.dumps(jsonConfig))
+        if args.private_test:
+            producer_accounts = create_random_accounts(21, (args.token_issue * 0.01), (args.token_issue * 0.02), "prodname")
+            normal_accounts = create_random_accounts(30, (args.token_issue * 0.01), (args.token_issue * 0.02))
+            jsonConfig['node_index'] = 30 - 1
+            reg_producers(producer_accounts)
+            start_all_nodes(producer_accounts)
+            vote_producers(producer_accounts, producer_accounts)
+            vote_producers(normal_accounts, producer_accounts)
+            time.sleep(60)
+            resign_all()
+except Exception as e:
+    print e.message
+finally:
+    create_file(os.path.join(parent_dir, 'config/config.json'), json.dumps(jsonConfig))

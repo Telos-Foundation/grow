@@ -63,9 +63,9 @@ class tlos_wallet:
                     return True
             return False
         except ValueError as e:
-            print ('Error occured while attempting to parse wallet password! Message: %s' % e.message)
+            raise ValueError('Error occured while attempting to parse wallet password! Message:', e.message)
         except OSError as e:
-            print ('Error occured while attempting to get file! %s' % e.message)
+            raise OSError('Error occured while attempting to get file!', e.message)
 
     def get_keys(self):
         try:
@@ -81,7 +81,7 @@ class tlos_wallet:
                 output.append(d)
             return output
         except OSError as e:
-            print ('Error occured while attempting to get file! %s' % e.message)
+            raise OSError('Error occured while attempting to get file!', e.message)
         
 
     def contains_key(self, key):
@@ -101,7 +101,7 @@ class tlos_wallet:
             public = o[1][o[1].index(':') + 2:len(o[1])]
             return { "private" : private, "public" : public }
         except ValueError as e:
-            print ('Error occured while attempting to parse wallet password! Message: %s' % e.message)
+            raise ValueError('Error occured while attempting to parse wallet password! Message: %s' % e.message)
 
     def import_key(self, private_key):
         run(self.teclos_start + ' wallet import %s' % (private_key))
@@ -113,10 +113,8 @@ class tlos_wallet:
                 return r
             else: 
                 print 'unable to parse wallet password'
-        except Exception as identifier:
-            print 'An error occurred while parsing password. Do you have a wallet?'
-            print identifier.message
-            sys.exit(1)
+        except ValueError as e:
+            raise ValueError('An error occurred while parsing password. Do you have a wallet?', e.message)
 
     def start_wallet(self):
         os.makedirs(self.wallet_dir)
@@ -131,7 +129,5 @@ class tlos_wallet:
                 return f.readline()
             else:
                 print "wallet password does not exist"
-        except Exception as identifier:
-            print 'An error occurred while attempting to get wallet password from ./wallet/wallet_pw.txt'
-            print identifier.message
-            sys.exit(1)
+        except Exception as e:
+            raise  OSError('An error occurred while attempting to get wallet password from ./wallet/wallet_pw.txt', e.message)
