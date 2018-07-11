@@ -354,7 +354,7 @@ if args.boot_strap:
     system_accounts = create_system_accounts(systemAccounts)
     set_system_contracts(systemContracts)
     issue_token(args.token_supply, args.token_issue)
-    run(teclos_dir + ' set contract eosio telos/build/contracts/eosio.system -p eosio')
+    run(teclos_dir + ' set contract eosio %s -p eosio') % (os.path.join(os.path.join(eos_dir, contracts), 'eosio.system'))
     run(teclos_dir + ' push action eosio setpriv \'[\"eosio.msig\", 1]\' -p eosio@active')
     if args.fund_account:
         print "Creating fund account"
