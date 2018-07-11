@@ -34,10 +34,13 @@ def reset_cwd():
 #endregion
 
 def get_repository():
+    print eos_dir
     if os.path.exists(eos_dir):
         print "Path exists."
         return
-    run(['git clone %s --recursive' % telos_repo_url, '--directory ', eos_dir])
+    dir = os.path.abspath(os.path.join(eos_dir, '..'))
+    os.chdir(dir)
+    run(['git clone %s --recursive' % telos_repo_url])
     print 'changing to eos directory: ' + eos_dir
     os.chdir(eos_dir)
     if args.tag_name != "":
@@ -56,7 +59,7 @@ def build_eos():
 
 def update_repository():
     print "update_repository()"
-    os.chdir(eos_dir)
+    os.chdir(os.path.join(start_cwd, 'telos'))
     run('git stash')
     run('git pull origin master')
     run('git checkout %s' % (args.tag_name))
@@ -304,8 +307,6 @@ if args.eos_dir != 'telos':
 elif 'eos-source-dir' in jsonConfig or jsonConfig['eos-source-dir'] != "":
     eos_dir = os.path.abspath(jsonConfig['eos-source-dir'])
 jsonConfig['eos-source-dir'] = eos_dir
-
-print eos_dir
 
 contracts = "build/contracts"
 keosd_dir = os.path.join(eos_dir, "build/programs/keosd/keosd")
