@@ -186,7 +186,7 @@ def reg_producer(a):
 
 def transfer(sender, receipient, amount, memo = ""):
     cmd = teclos_dir + ' transfer %s %s \"%s %s\" \"%s\"'
-    run_retry(cmd % (sender, receipient, amount, args.symbol, memo))
+    run_retry(cmd % (sender, receipient, amount, memo))
 
 #region node management
 def start_full():
@@ -372,8 +372,8 @@ try:
             if args.fund_account:
                 print "Creating fund account"
                 fund_account = create_account_obj('telosfundacc')
-                create_staked_account(fund_account, Asset(1000.0000), Asset(1000.0000), Asset(1000.0000))
-                transfer('eosio', fund_account['name'], str(args.token_issue * 0.15), "Sending 15 percent stake and enough money to create new accounts")
+                create_staked_account(fund_account, Asset((args.token_issue * 0.15) / 2), Asset((args.token_issue * 0.15) / 2), Asset(1000.0000))
+                transfer('eosio', fund_account['name'], Asset(1000.0000), "Sending 15 percent stake and enough money to create new accounts")
 
         if 'snapshot' in args and args.snapshot != "" and args.snapshot != None:
             if os.path.isfile(args.snapshot):
