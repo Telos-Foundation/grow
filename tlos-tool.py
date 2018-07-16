@@ -112,6 +112,8 @@ def create_system_accounts(account_names):
 
 def create_random_accounts(num_accounts, min, max, base = "acctname"):
     accounts = []
+    min = int(min)
+    max = int(max)
     for _ in range(num_accounts):
         a = create_account_obj(base + id_generator())
         create_staked_account(a, Asset(randint(min, max)), Asset(randint(min, max)), Asset(randint(min, max)))
@@ -137,7 +139,7 @@ def push_action(target, action_name, json):
 def vote_producers(a_accounts, b_accounts):
     print "vote_producers()"
     for a in a_accounts:
-        cmd = teclos_dir + ' system voteproducer prods ' + a['name'] + ''
+        cmd = teclos_dir + ' system voteproducer prods ' + a['name'] + ' '
         i = 0
         for t in b_accounts:
             if a['name'] not in t['name'] and i < randint(10, 30):
@@ -381,12 +383,12 @@ try:
 
         if args.private_test:
             producer_accounts = create_random_accounts(21, (args.token_issue * 0.01), (args.token_issue * 0.02), "prodname")
-            normal_accounts = create_random_accounts(30, (args.token_issue * 0.01), (args.token_issue * 0.02))
+            #normal_accounts = create_random_accounts(30, (args.token_issue * 0.01), (args.token_issue * 0.02))
             jsonConfig['node_index'] = 30 - 1
             reg_producers(producer_accounts)
             start_all_nodes(producer_accounts)
             vote_producers(producer_accounts, producer_accounts)
-            vote_producers(normal_accounts, producer_accounts)
+            #vote_producers(normal_accounts, producer_accounts)
             time.sleep(60)
             resign_all()
 except Exception as e:
