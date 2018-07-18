@@ -5,3 +5,7 @@
 /en-*
 wallet
 .DS_Store
+__pycache__
+venv
+.vs_code
+.idea

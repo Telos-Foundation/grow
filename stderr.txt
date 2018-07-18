@@ -1,0 +1,23 @@
+2018-07-18T01:26:26.206 thread-0   http_plugin.cpp:290           plugin_initialize    ] configured http to listen on 0.0.0.0:8888
+2018-07-18T01:26:26.206 thread-0   chain_plugin.cpp:209          plugin_initialize    ] initializing chain plugin
+2018-07-18T01:26:26.207 thread-0   chain_plugin.cpp:316          plugin_initialize    ] Deleting state database and blocks
+2018-07-18T01:26:26.209 thread-0   chain_plugin.cpp:379          plugin_initialize    ] Using genesis state provided in '/Users/hotmdev4/Desktop/grow/genesis.json'
+2018-07-18T01:26:26.209 thread-0   chain_plugin.cpp:385          plugin_initialize    ] Starting up fresh blockchain with provided genesis state.
+2018-07-18T01:26:29.285 thread-0   net_plugin.cpp:2948           plugin_initialize    ] Initialize net plugin
+2018-07-18T01:26:29.286 thread-0   net_plugin.cpp:2972           plugin_initialize    ] host: 0.0.0.0 port: 9876 
+2018-07-18T01:26:29.286 thread-0   net_plugin.cpp:3044           plugin_initialize    ] my node_id is de14217c84076bbb6e57a72b75027b88070bf4aa6b90aaa854fbe7f4ad57c51e
+2018-07-18T01:26:29.287 thread-0   net_api_plugin.cpp:95         plugin_initialize    ] 
+**********SECURITY WARNING**********
+*                                  *
+* --         Net API            -- *
+* - EXPOSED to the LOCAL NETWORK - *
+* - USE ONLY ON SECURE NETWORKS! - *
+*                                  *
+************************************
+
+2018-07-18T01:26:29.289 thread-0   http_plugin.cpp:254           operator()           ] configured http with Access-Control-Allow-Origin: *
+2018-07-18T01:26:29.289 thread-0   main.cpp:104                  main                 ] nodeos version f36c322e
+2018-07-18T01:26:29.289 thread-0   main.cpp:105                  main                 ] eosio root is /Users/hotmdev4/Library/Application Support
+2018-07-18T01:26:29.290 thread-0   http_plugin.cpp:331           plugin_startup       ] start listening for http requests
+2018-07-18T01:26:29.291 thread-0   http_plugin.cpp:338           plugin_startup       ] http service failed to start: Address already in use
+2018-07-18T01:26:30.224 thread-0   main.cpp:133                  main                 ] Address already in use
