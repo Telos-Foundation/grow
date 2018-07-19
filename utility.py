@@ -74,7 +74,7 @@ def start_background_proc(args, file, path='./nodeos.pid'):
     print(args)
     p = subprocess.Popen(args,
                          stdout=file,
-                         stderr=file, shell=True)
+                         stderr=file, shell=False)
     create_file(path, p.pid)
 
 
