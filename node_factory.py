@@ -192,6 +192,7 @@ class NodeFactory:
     def get_status(self, name):
         n = self.get_node_from_state(name)
         status = 'OFFLINE'
+        sleep(0.5)
         if n.is_running():
             status = 'ONLINE'
         print('Node %s is %s' % (n.name, status))
