@@ -77,9 +77,9 @@ class Node:
 
     def get_ports(self):
         p2p = self.config.get('p2p-listen-endpoint')
-        p2p = int(p2p[p2p.index(':') + 1:len(p2p) - 1])
+        p2p = int(p2p[p2p.index(':') + 1:len(p2p) + 1])
         http = self.config.get('http-server-address')
-        http = int(http[http.index(':') + 1:len(http) - 1])
+        http = int(http[http.index(':') + 1:len(http) + 1])
         return [p2p, http]
 
     def get_endpoints(self):
@@ -279,7 +279,9 @@ class NodeFactory:
         try:
             nodes = self.get_all_nodes_from_state()
             for n in nodes:
+                print('Stopping node %s...' % n.name)
                 n.stop()
+                self.get_status(n.name)
                 if os.path.isdir(n.path):
                     rmtree(n.path)
             self.clear_state()
