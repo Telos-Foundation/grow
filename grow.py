@@ -31,7 +31,7 @@ class Grow:
 
         self.wallet = Wallet(self.wallet_dir, self.teclos_dir, self.telos_dir, self.keosd_dir, 999999999)
         self.node_factory = NodeFactory(self.start_cwd, self.parent_dir, self.nodeos_dir, self.wallet)
-        self.initializer = Initializer(self.telos_dir)
+        self.initializer = Initializer(self.telos_dir, self.start_cwd)
         self.account_factory = AccountFactory(self.wallet, self.teclos_dir)
         self.boot_strapper = BootStrapper(self.telos_dir, self.teclos_dir, self.host_address, self.account_factory)
 
@@ -46,10 +46,11 @@ class Grow:
 
 class Initializer:
 
-    def __init__(self, telos):
+    def __init__(self, telos, cwd):
         self.git_tag = 'developer'
         self.telos_dir = telos
         self.telos_repo_url = "https://github.com/Telos-Foundation/telos.git"
+        self.start_cwd = cwd
 
     def set_tag(self, tag):
         self.git_tag = tag
