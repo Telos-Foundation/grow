@@ -48,7 +48,7 @@ class Initializer:
 
     def __init__(self, telos):
         self.git_tag = 'developer'
-        self.telos_repo_url = telos
+        self.telos_dir = telos
         self.telos_repo_url = "https://github.com/Telos-Foundation/telos.git"
 
     def set_tag(self, tag):
