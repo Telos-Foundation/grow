@@ -71,7 +71,7 @@ class Initializer:
                 run(['git', 'checkout', '-f', self.git_tag], False)
             run('git submodule update --init --recursive')
             self.reset_cwd()
-            self.build_eos()
+            self.build_source()
         except OSError as e:
             print(e)
 
