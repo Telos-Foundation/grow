@@ -72,6 +72,7 @@ def get_output(args):
 
 def start_background_proc(args, file, path='./nodeos.pid'):
     print(args)
+    args = args.split(' ')
     p = subprocess.Popen(args,
                          stdout=file,
                          stderr=file, shell=False)
