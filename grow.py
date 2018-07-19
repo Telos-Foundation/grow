@@ -7,7 +7,6 @@ from bootstrapper import BootStrapper
 from asset import Asset
 import click
 import json
-import readline
 
 
 class Grow:
@@ -232,7 +231,7 @@ def show_nodes():
 def reset():
     """Stops and then deletes all nodes"""
     i = input('This will stop all nodes and delete their folders, and remove state. Are you sure you want this? (Y/n)\n')
-    print(i)
+
     if i.lower() == 'yes' or i.lower() == 'y':
         grow.node_factory.delete_all_nodes()
 
@@ -319,7 +318,7 @@ def gen(json_only):
 @wallet.command('reset')
 def reset_wallet():
     """Stops and then deletes all nodes"""
-    i = readline('This will destroy your wallet and terminate the keosd process. Are you sure you want that? (Y/n)')
+    i = input('This will destroy your wallet and terminate the keosd process. Are you sure you want that? (Y/n)')
 
     if i.lower() == 'yes' or i.lower() == 'y':
         grow.wallet.reset()
