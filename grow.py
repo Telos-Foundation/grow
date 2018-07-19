@@ -136,12 +136,16 @@ def spin():
 @click.option('--fund-account', default=False)
 def full(http_port, p2p_port, p2p_address, path, fund_account):
     """Start a genesis node"""
-    grow.wallet.unlock()
-    grow.node_factory.start_full(path, p2p_address, http_port, p2p_port)
-    grow.boot_strapper.boot_strap_node('http://localhost:%s' % http_port)
-    if fund_account:
-        grow.boot_strapper.create_fund_account()
-    grow.save()
+    try:
+        grow.wallet.unlock()
+        grow.node_factory.start_full(path, p2p_address, http_port, p2p_port)
+        grow.boot_strapper.boot_strap_node('http://localhost:%s' % http_port)
+        if fund_account:
+            grow.boot_strapper.create_fund_account()
+    except KeyError as e:
+        print(e)
+    finally:
+        grow.save()
 
 
 @spin.command()
@@ -161,13 +165,17 @@ def single(path):
 @click.option('--max-stake', type=float, default=0.02)
 def mesh(path, num_nodes, min_stake, max_stake):
     """Start a private mesh of nodes"""
-    grow.wallet.unlock()
-    grow.node_factory.start_full(path, '0.0.0.0', str(8888), str(9876))
-    grow.boot_strapper.boot_strap_node('http://localhost:%s' % str(8888))
-    accounts = grow.account_factory.create_random_accounts(num_nodes, BootStrapper.token_issue * min_stake,
-                                                           BootStrapper.token_issue * max_stake)
-    grow.node_factory.start_producers_by_account(accounts, num_nodes)
-    grow.save()
+    try:
+        grow.wallet.unlock()
+        grow.node_factory.start_full(path, '0.0.0.0', str(8888), str(9876))
+        grow.boot_strapper.boot_strap_node('http://localhost:%s' % str(8888))
+        accounts = grow.account_factory.create_random_accounts(num_nodes, BootStrapper.token_issue * min_stake,
+                                                               BootStrapper.token_issue * max_stake)
+        grow.node_factory.start_producers_by_account(accounts, num_nodes)
+    except KeyError as e:
+        print(e)
+    finally:
+        grow.save()
 
 
 @spin.command()

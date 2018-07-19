@@ -112,6 +112,8 @@ class NodeFactory:
         self.working_dir = working
         self.config_dir = join(parent, 'config/nodes.json')
         self.state = json.loads(file_get_contents(self.config_dir))
+        if 'nodes' not in self.state:
+            self.state['nodes'] = {}
         self.wallet = wallet
 
     def create_sig_provider(self, keypair):
@@ -198,6 +200,8 @@ class NodeFactory:
         return json.dumps(self.state['nodes'], indent=4, sort_keys=True)
 
     def get_node_from_state(self, name):
+        if 'nodes' not in self.state:
+            self.state['nodes'] = {}
         if name in self.state['nodes']:
             n = self.state['nodes'][name]
             return Node(n['name'], n['path'])
@@ -211,7 +215,6 @@ class NodeFactory:
         for name in self.state['nodes']:
             nodes.append(self.get_node_from_state(name))
         return nodes
-
 
     def get_open_port(self):
         port = self.last_found_port()
@@ -230,7 +233,7 @@ class NodeFactory:
                     return False
         return True
 
-    #TODO: See if there are any special update operations that need to be resolved
+    # TODO: See if there are any special update operations that need to be resolved
     def update_node_state(self, node):
         if 'nodes' not in self.state:
             self.state['nodes'] = {}
