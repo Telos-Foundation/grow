@@ -47,7 +47,7 @@ class Node:
     def start(self, delay_time=1.0):
         if not os.path.isdir(self.path):
             os.makedirs(self.path)
-        cmd = 'nodeos --config-dir %s --genesis-json %s --delete-all-blocks'
+        cmd = NodeFactory.nodeos_dir + ' --config-dir %s --genesis-json %s --delete-all-blocks'
         genesis_dir = join(self.path, 'genesis.json')
         print('Starting node: %s' % self.name)
         start_background_proc(cmd % (self.path, genesis_dir), log_file(join(self.path, 'stderr.txt')),
@@ -58,7 +58,7 @@ class Node:
         if self.is_running():
             self.stop()
         if os.path.isdir(self.path):
-            cmd = 'nodeos --config-dir %s --hard-replay-blockchain'
+            cmd = NodeFactory.nodeos_dir + ' --config-dir %s --hard-replay-blockchain'
             start_background_proc(cmd % self.path, log_file(join(self.path, 'stderr.txt')), join(self.path, 'node.pid'))
             sleep(delay_time)
         else:
@@ -105,6 +105,7 @@ class Node:
 
 
 class NodeFactory:
+    nodeos_dir = ''
 
     def __init__(self, working, parent, nodeos, wallet):
         self.folder_scheme = 'tn-'
