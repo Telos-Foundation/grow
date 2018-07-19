@@ -78,6 +78,8 @@ class AccountFactory:
 
     def create_random_accounts(self, num_accounts, min, max, base = "acctname"):
         accounts = []
+        min = int(min)
+        max = int(max)
         for _ in range(num_accounts):
             a = self.get_acc_obj(base + id_generator())
             self.post_sys_create(a, Asset(randint(min, max)), Asset(randint(min, max)), Asset(randint(min, max)))

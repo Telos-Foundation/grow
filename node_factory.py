@@ -205,6 +205,8 @@ class NodeFactory:
             raise ValueError('Node %s does not exist in nodes.json')
 
     def get_all_nodes_from_state(self):
+        if 'nodes' not in self.state:
+            self.state['nodes'] = {}
         nodes = []
         for name in self.state['nodes']:
             nodes.append(self.get_node_from_state(name))
