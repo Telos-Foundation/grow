@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f5f4dbfa-551d-4b91-a3f8-ee0828fe5334" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/grow.py" beforeDir="false" afterPath="$PROJECT_DIR$/grow.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/state.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/state.json" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -36,14 +35,23 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="grow.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="grow.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/grow.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="291">
-              <caret line="50" column="22" selection-start-line="50" selection-start-column="22" selection-end-line="50" selection-end-column="22" />
+            <state relative-caret-position="241">
+              <caret line="65" column="4" selection-start-line="63" selection-start-column="3" selection-end-line="65" selection-end-column="4" />
               <folding>
                 <element signature="e#25#46#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="state.json" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/config/state.json">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="60">
+              <caret line="4" column="1" lean-forward="true" selection-start-line="4" selection-start-column="1" selection-end-line="4" selection-end-column="1" />
             </state>
           </provider>
         </entry>
@@ -112,7 +120,6 @@
         <option value="$PROJECT_DIR$/config/nodes.json" />
         <option value="$PROJECT_DIR$/utility.py" />
         <option value="$PROJECT_DIR$/bootstrapper.py" />
-        <option value="$PROJECT_DIR$/config/state.json" />
         <option value="$PROJECT_DIR$/account.py" />
         <option value="$PROJECT_DIR$/wallet.py" />
         <option value="$PROJECT_DIR$/wallet.py" />
@@ -121,6 +128,7 @@
         <option value="$PROJECT_DIR$/node_factory.py" />
         <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/grow.py" />
+        <option value="$PROJECT_DIR$/config/state.json" />
       </list>
     </option>
   </component>
@@ -526,13 +534,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/config/state.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="1" column="9" selection-start-line="1" selection-start-column="9" selection-end-line="1" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/psutil/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="442">
@@ -613,11 +614,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/grow.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="291">
-          <caret line="50" column="22" selection-start-line="50" selection-start-column="22" selection-end-line="50" selection-end-column="22" />
+        <state relative-caret-position="241">
+          <caret line="65" column="4" selection-start-line="63" selection-start-column="3" selection-end-line="65" selection-end-column="4" />
           <folding>
             <element signature="e#25#46#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/state.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="1" lean-forward="true" selection-start-line="4" selection-start-column="1" selection-end-line="4" selection-end-column="1" />
         </state>
       </provider>
     </entry>
