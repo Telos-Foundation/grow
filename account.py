@@ -36,6 +36,9 @@ class AccountFactory:
         net = Asset(net)
         cpu = Asset(cpu)
         ram = Asset(ram)
+        print(ram)
+        print(cpu)
+        print(net)
         cmd = self.teclos + ' --url %s system newaccount %s --transfer %s %s --stake-net \"%s\" --stake-cpu \"%s\" --buy-ram \"%s\"'
         run_retry(cmd % (self.host_address, creator, a.name, a.keypair.public, net, cpu, ram))
 
