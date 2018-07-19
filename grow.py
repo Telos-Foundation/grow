@@ -230,8 +230,8 @@ def show_nodes():
 @spin.command('reset')
 def reset():
     """Stops and then deletes all nodes"""
-    i = input('This will stop all nodes and delete their folders, and remove state. Are you sure you want this? (Y/n)')
-
+    i = input('This will stop all nodes and delete their folders, and remove state. Are you sure you want this? (Y/n)\n')
+    print(i)
     if i.lower() == 'yes' or i.lower() == 'y':
         grow.node_factory.delete_all_nodes()
 
