@@ -109,7 +109,7 @@ class NodeFactory:
 
     def __init__(self, working, parent, nodeos, wallet):
         self.folder_scheme = 'tn-'
-        self.nodeos_dir = nodeos
+        NodeFactory.nodeos_dir = nodeos
         self.parent_dir = parent
         self.working_dir = working
         self.config_dir = join(parent, 'config/nodes.json')
