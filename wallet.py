@@ -33,6 +33,7 @@ class Wallet:
         self.teclos_start = '%s --wallet-url %s' % (teclos_dir, self.wallet_address)
         self.unlockTimeout = unlockTimeout
         self.pid = -1
+
         if forceRestart:
             self.reset()
 

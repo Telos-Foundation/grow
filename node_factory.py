@@ -49,17 +49,18 @@ class Node:
             os.makedirs(self.path)
         cmd = 'nodeos --config-dir %s --genesis-json %s --delete-all-blocks'
         genesis_dir = join(self.path, 'genesis.json')
+        print('Starting node: %s' % self.name)
         start_background_proc(cmd % (self.path, genesis_dir), log_file(join(self.path, 'stderr.txt')),
                               join(self.path, 'node.pid'))
         sleep(delay_time)
 
-    def restart(self):
+    def restart(self, delay_time=1.0):
         if self.is_running():
             self.stop()
         if os.path.isdir(self.path):
             cmd = 'nodeos --config-dir %s --hard-replay-blockchain'
             start_background_proc(cmd % self.path, log_file(join(self.path, 'stderr.txt')), join(self.path, 'node.pid'))
-            sleep(1.0)
+            sleep(delay_time)
         else:
             print('nodeos folder path: %s does not exist' % self.path)
 
