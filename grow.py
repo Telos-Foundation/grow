@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.7
+#!/usr/bin/env python3
 from utility import *
 from wallet import Wallet
 from node_factory import NodeFactory
