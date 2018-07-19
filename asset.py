@@ -4,4 +4,4 @@ class Asset:
         self.amount = amount
 
     def __str__(self):
-        return ('%s %s') % (format(str(self.amount), '.4f'), self.symbol)
+        return ('%s %s') % ('{0:.2f}'.format(str(self.amount)), self.symbol)
