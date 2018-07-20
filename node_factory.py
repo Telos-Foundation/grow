@@ -77,11 +77,15 @@ class Node:
         tail(join(self.path, 'stderr.txt'))
 
     def get_ports(self):
+        return [self.get_p2p_port(), self.get_http_port()]
+
+    def get_p2p_port(self):
         p2p = self.config.get('p2p-listen-endpoint')
-        p2p = int(p2p[p2p.index(':') + 1:len(p2p) + 1])
+        return int(p2p[p2p.index(':') + 1:len(p2p) + 1])
+
+    def get_http_port(self):
         http = self.config.get('http-server-address')
-        http = int(http[http.index(':') + 1:len(http) + 1])
-        return [p2p, http]
+        return int(http[http.index(':') + 1:len(http) + 1])
 
     def get_endpoints(self):
         return self.config.get('p2p-server-address')
@@ -133,7 +137,7 @@ class NodeFactory:
 
     def start_full(self, path, p2p_address, http_port, p2p_port):
         try:
-            nodepath = join(path, self.folder_scheme + 'full')
+            nodepath = join(path, self.folder_scheme + 'genesis')
             if not os.path.isdir(nodepath):
                 os.makedirs(nodepath)
             os.chdir(nodepath)
@@ -186,7 +190,7 @@ class NodeFactory:
         nodes = []
         endpoints = {}
         genesis = self.get_node_from_state('genesis')
-        endpoints['genesis'] = genesis.get_endpoints()
+        endpoints['genesis'] = 'localhost:' + str(genesis.get_p2p_port())
         for a in accounts:
             node = self.create_producer_node(a, path, 'localhost')
             endpoints[a.name] = node.get_endpoints()
