@@ -169,11 +169,11 @@ def mesh(path, num_nodes, min_stake, max_stake):
         grow.wallet.unlock()
         grow.node_factory.start_full(path, '0.0.0.0', str(8888), str(9876))
         grow.boot_strapper.boot_strap_node('http://localhost:%s' % str(8888))
-        accounts = grow.account_factory.create_random_accounts(num_nodes, BootStrapper.token_issue * min_stake,
+        producers = grow.account_factory.create_random_accounts(num_nodes, BootStrapper.token_issue * min_stake,
                                                                BootStrapper.token_issue * max_stake, 'prodname')
-        grow.boot_strapper.reg_producer(accounts)
-        grow.node_factory.start_producers_by_account(accounts, path)
-        grow.boot_strapper.vote_producers(accounts, accounts)
+        grow.boot_strapper.reg_producers(producers)
+        grow.node_factory.start_producers_by_account(producers, path)
+        grow.boot_strapper.vote_producers(producers, producers)
     except KeyError as e:
         print(e)
     finally:
