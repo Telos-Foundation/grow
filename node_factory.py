@@ -173,7 +173,6 @@ class NodeFactory:
             config.write(join(nodepath, 'config.ini'))
             copyfile(join(self.parent_dir, 'config/genesis.json'), join(nodepath, "genesis.json"))
             node = Node(account.name, nodepath)
-            self.update_node_state(node)
             return node
         except FileNotFoundError as e:
             print(e)
@@ -189,6 +188,9 @@ class NodeFactory:
         for n in nodes:
             n.set_peers(endpoints)
             n.start()
+            n.get_pid()
+            print(n.config.dict)
+            self.update_node_state(n)
 
     def get_status(self, name):
         n = self.get_node_from_state(name)
@@ -232,7 +234,6 @@ class NodeFactory:
             self.state['nodes'] = {}
         if len(self.state['nodes']) == 0:
             return True
-        print(self.state)
         for node in self.state['nodes']:
             for node_port in self.state['nodes'][node]['ports']:
                 if node_port == port:
