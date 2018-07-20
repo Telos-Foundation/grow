@@ -146,6 +146,7 @@ class NodeFactory:
             config.set('http-server-address', '0.0.0.0:' + http_port)
             config.set('p2p-listen-endpoint', '0.0.0.0:' + p2p_port)
             config.set('p2p-server-address', '%s:%s' % (p2p_address, p2p_port))
+            config.set('enable-stale-production', True)
             config.set('producer-name', 'eosio')
             pair = self.wallet.create_import()
             self.edit_new_genesis(pair.public)
@@ -174,7 +175,7 @@ class NodeFactory:
             config.set('http-server-address', '0.0.0.0:' + str(self.get_open_port()))
             p2p_port = str(self.get_open_port())
             config.set('p2p-listen-endpoint', '0.0.0.0:' + p2p_port)
-            config.set('p2p-server-address', '%s:%s' % (p2p_address, p2p_port))
+            config.set('p2p-server-address', '%s:%s' % (str(p2p_address), str(p2p_port)))
             config.set('producer-name', account.name)
             config.set('signature-provider', self.create_sig_provider(account.keypair))
             plugins = ['eosio::producer_plugin']

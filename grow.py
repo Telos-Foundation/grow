@@ -172,6 +172,8 @@ def mesh(path, num_nodes, min_stake, max_stake):
         accounts = grow.account_factory.create_random_accounts(num_nodes, BootStrapper.token_issue * min_stake,
                                                                BootStrapper.token_issue * max_stake, 'prodname')
         grow.node_factory.start_producers_by_account(accounts, path)
+        grow.boot_strapper.reg_producer(accounts)
+        grow.boot_strapper.vote_producers(accounts, accounts)
     except KeyError as e:
         print(e)
     finally:
