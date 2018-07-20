@@ -143,6 +143,7 @@ class NodeFactory:
             os.chdir(nodepath)
             config = ConfigurationParser()
             config.read(join(self.parent_dir, 'config/template_config.ini'))
+            config.set('blocks-dir', join(nodepath, 'blocks'))
             config.set('http-server-address', '0.0.0.0:' + http_port)
             config.set('p2p-listen-endpoint', '0.0.0.0:' + p2p_port)
             config.set('p2p-server-address', '%s:%s' % (p2p_address, p2p_port))
