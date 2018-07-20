@@ -161,6 +161,7 @@ class NodeFactory:
             node = Node('genesis', nodepath)
             node.start(3.0)
             self.update_node_state(node)
+            self.save()
         except FileNotFoundError as e:
             print(e)
 
@@ -222,7 +223,7 @@ class NodeFactory:
             n = self.state['nodes'][name]
             return Node(n['name'], n['path'])
         else:
-            raise ValueError('Node %s does not exist in nodes.json')
+            raise ValueError('Node does not exist in nodes.json')
 
     def get_all_nodes_from_state(self):
         if 'nodes' not in self.state:

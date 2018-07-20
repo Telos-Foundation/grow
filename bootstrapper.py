@@ -85,7 +85,7 @@ class BootStrapper:
             cmd = self.teclos_dir + ' --url %s system voteproducer prods ' + a.name + ' '
             i = 0
             for t in b_accounts:
-                if a not in t.name and i < randint(10, 30):
+                if a.name != t.name and i < randint(10, 30):
                     cmd += t.name + " "
                     i = i + 1
             run_retry(cmd % self.host_address)
