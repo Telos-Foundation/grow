@@ -89,7 +89,12 @@ class Node:
     def set_peers(self, peers):
         tmp = peers.copy()
         self.remove_self(tmp)
-        self.config.append('p2p-peer-address', tmp)
+
+        endpoints = []
+        for name in tmp:
+            endpoints.append(tmp[name])
+
+        self.config.append('p2p-peer-address', endpoints)
         self.config.write(join(self.path, 'config.ini'))
 
     def remove_self(self, peers):
@@ -180,8 +185,10 @@ class NodeFactory:
     def start_producers_by_account(self, accounts, path):
         nodes = []
         endpoints = {}
+        genesis = self.get_node_from_state('genesis')
+        endpoints['genesis'] = genesis.get_endpoints()
         for a in accounts:
-            node = self.create_producer_node(a, path, '0.0.0.0')
+            node = self.create_producer_node(a, path, 'localhost')
             endpoints[a.name] = node.get_endpoints()
             nodes.append(node)
 
