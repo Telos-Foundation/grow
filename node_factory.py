@@ -148,7 +148,7 @@ class NodeFactory:
             config.append('plugin', plugins)
             config.write(join(nodepath, 'config.ini'))
             copyfile(join(self.parent_dir, 'config/genesis.json'), join(nodepath, "genesis.json"))
-            node = Node(self.folder_scheme + 'full', nodepath)
+            node = Node('genesis', nodepath)
             node.start(3.0)
             self.update_node_state(node)
         except FileNotFoundError as e:
@@ -162,16 +162,18 @@ class NodeFactory:
             os.chdir(nodepath)
             config = ConfigurationParser()
             config.read(join(self.parent_dir, 'config/template_config.ini'))
-            config.set('http-server-address', '0.0.0.0:' + self.get_open_port())
-            config.set('p2p-listen-endpoint', '0.0.0.0:' + self.get_open_port())
-            config.set('p2p-server-address', '%s:%s' % (p2p_address, self.get_open_port()))
+            config.set('http-server-address', '0.0.0.0:' + str(self.get_open_port()))
+            p2p_port = str(self.get_open_port())
+            config.set('p2p-listen-endpoint', '0.0.0.0:' + p2p_port)
+            config.set('p2p-server-address', '%s:%s' % (p2p_address, p2p_port))
             config.set('producer-name', account.name)
             config.set('signature-provider', self.create_sig_provider(self.wallet.create_import()))
             plugins = ['eosio::producer_plugin']
             config.append('plugin', plugins)
             config.write(join(nodepath, 'config.ini'))
             copyfile(join(self.parent_dir, 'config/genesis.json'), join(nodepath, "genesis.json"))
-            node = Node(self.folder_scheme + account.name, nodepath)
+            node = Node(account.name, nodepath)
+            self.update_node_state(n)
             return node
         except FileNotFoundError as e:
             print(e)
@@ -180,19 +182,17 @@ class NodeFactory:
         nodes = []
         endpoints = {}
         for a in accounts:
-            node = self.create_producer_node(a, '0.0.0.0')
+            node = self.create_producer_node(a, path, '0.0.0.0')
             endpoints[a.name] = node.get_endpoints()
             nodes.append(node)
 
         for n in nodes:
             n.set_peers(endpoints)
             n.start()
-            self.update_node_state(n)
 
     def get_status(self, name):
         n = self.get_node_from_state(name)
         status = 'OFFLINE'
-        sleep(0.5)
         if n.is_running():
             status = 'ONLINE'
         print('Node %s is %s' % (n.name, status))
@@ -220,18 +220,21 @@ class NodeFactory:
         return nodes
 
     def get_open_port(self):
-        port = self.last_found_port()
+        port = self.find_free_port()
         while not self.is_port_unclaimed(port):
-            port = self.get_port_from_range(port)
-        self.set_last_found_port(port + 1)
+            print('Looking for port')
+            port = self.find_free_port()
+        print('Found port: %s' % str(port))
         return port
 
     def is_port_unclaimed(self, port):
         if 'nodes' not in self.state:
             self.state['nodes'] = {}
-
+        if len(self.state['nodes']) == 0:
+            return True
+        print(self.state)
         for node in self.state['nodes']:
-            for node_port in node['ports']:
+            for node_port in self.state['nodes'][node]['ports']:
                 if node_port == port:
                     return False
         return True
@@ -246,12 +249,21 @@ class NodeFactory:
         else:
             self.state['nodes'][node.name] = node.get_info()
 
+    def find_free_port(self):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind(('', 0))
+            return s.getsockname()[1]
+
     def get_port_from_range(self, floor):
-        for port in range(floor, 10000):
+        print('Getting port from range')
+        for port in range(floor, 20000):
+            print(port)
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            result = sock.connect_ex(('0.0.0.0', port))
+            result = sock.connect_ex(('localhost', port))
+            print(result)
             if result == 0:
                 print("Port {}: 	 Open".format(port))
+                sock.close()
                 return port
             sock.close()
 
@@ -284,6 +296,7 @@ class NodeFactory:
             for n in nodes:
                 print('Stopping node %s...' % n.name)
                 n.stop()
+                sleep(1)
                 self.get_status(n.name)
                 if os.path.isdir(n.path):
                     rmtree(n.path)

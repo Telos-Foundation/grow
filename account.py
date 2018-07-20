@@ -33,14 +33,8 @@ class AccountFactory:
         run(self.teclos + ' --url %s create account eosio %s %s' % (self.host_address, a.name, a.keypair.public))
 
     def post_sys_create(self, a, net, cpu, ram, creator='eosio'):
-        net = Asset(net)
-        cpu = Asset(cpu)
-        ram = Asset(ram)
-        print(ram)
-        print(cpu)
-        print(net)
         cmd = self.teclos + ' --url %s system newaccount %s --transfer %s %s --stake-net \"%s\" --stake-cpu \"%s\" --buy-ram \"%s\"'
-        run_retry(cmd % (self.host_address, creator, a.name, a.keypair.public, net, cpu, ram))
+        run_retry(cmd % (self.host_address, creator, a.name, a.keypair.public, Asset(net), Asset(cpu), Asset(ram)))
 
 
     #TODO: make sure the account name meetings TELOS normalized requirements
@@ -85,6 +79,6 @@ class AccountFactory:
         max = int(max)
         for _ in range(num_accounts):
             a = self.get_acc_obj(base + id_generator())
-            self.post_sys_create(a, Asset(randint(min, max)), Asset(randint(min, max)), Asset(randint(min, max)))
+            self.post_sys_create(a, randint(min, max), randint(min, max), randint(min, max))
             accounts.append(a)
         return accounts

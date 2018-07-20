@@ -170,8 +170,8 @@ def mesh(path, num_nodes, min_stake, max_stake):
         grow.node_factory.start_full(path, '0.0.0.0', str(8888), str(9876))
         grow.boot_strapper.boot_strap_node('http://localhost:%s' % str(8888))
         accounts = grow.account_factory.create_random_accounts(num_nodes, BootStrapper.token_issue * min_stake,
-                                                               BootStrapper.token_issue * max_stake)
-        grow.node_factory.start_producers_by_account(accounts, num_nodes)
+                                                               BootStrapper.token_issue * max_stake, 'prodname')
+        grow.node_factory.start_producers_by_account(accounts, path)
     except KeyError as e:
         print(e)
     finally:
