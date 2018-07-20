@@ -173,7 +173,7 @@ class NodeFactory:
             config.write(join(nodepath, 'config.ini'))
             copyfile(join(self.parent_dir, 'config/genesis.json'), join(nodepath, "genesis.json"))
             node = Node(account.name, nodepath)
-            self.update_node_state(n)
+            self.update_node_state(node)
             return node
         except FileNotFoundError as e:
             print(e)
