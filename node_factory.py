@@ -176,7 +176,7 @@ class NodeFactory:
             config.set('p2p-listen-endpoint', '0.0.0.0:' + p2p_port)
             config.set('p2p-server-address', '%s:%s' % (p2p_address, p2p_port))
             config.set('producer-name', account.name)
-            config.set('signature-provider', self.create_sig_provider(self.wallet.create_import()))
+            config.set('signature-provider', self.create_sig_provider(account.keypair))
             plugins = ['eosio::producer_plugin']
             config.append('plugin', plugins)
             config.write(join(nodepath, 'config.ini'))
