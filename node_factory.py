@@ -200,7 +200,6 @@ class NodeFactory:
             n.set_peers(endpoints)
             n.start()
             n.get_pid()
-            print(n.config.dict)
             self.update_node_state(n)
 
     def get_status(self, name):

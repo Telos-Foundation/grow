@@ -11,7 +11,6 @@ class ConfigurationParser:
         if option not in self.dict:
             self.dict[option] = []
         if len(self.dict[option]) == 0:
-            print('appending to list')
             self.dict[option].append(value)
 
     def append(self, option, value):

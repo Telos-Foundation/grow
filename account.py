@@ -78,7 +78,7 @@ class AccountFactory:
         min = int(min)
         max = int(max)
         for _ in range(num_accounts):
-            a = self.get_acc_obj(base + id_generator())
+            a = self.get_acc_obj(base + id_generator(), True)
             self.post_sys_create(a, randint(min, max), randint(min, max), randint(min, max))
             accounts.append(a)
         return accounts
