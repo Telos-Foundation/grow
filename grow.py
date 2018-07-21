@@ -161,20 +161,18 @@ def single(path):
 @spin.command()
 @click.argument('num-nodes', type=int, default=21)
 @click.argument('path', default=os.getcwd())
-@click.option('--min-stake', type=float, default=0.01)
-@click.option('--max-stake', type=float, default=0.02)
 @click.option('--genesis-http-port', default=8888)
 @click.option('--genesis-p2p-port', default=9876)
-def mesh(path, num_nodes, min_stake, max_stake, gen_http_port, gen_p2p_port):
+def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port):
     """Start a private mesh of nodes"""
     try:
-        percent_per_node = (max_stake * 100) * 3
-        if percent_per_node * num_nodes > 100:
-            print('Unable to complete operation, current max value would cause overdrawn exceptions')
-            return
+        max_stake = (100 / num_nodes) / 100
+        min_stake = max_stake / 2
+        assert((max_stake * 3 * 100) <= 100)
+
         grow.wallet.unlock()
-        grow.node_factory.start_full(path, '0.0.0.0', str(gen_http_port), str(gen_p2p_port))
-        grow.boot_strapper.boot_strap_node('http://localhost:%s' % str(gen_http_port))
+        grow.node_factory.start_full(path, '0.0.0.0', str(genesis_http_port), str(genesis_p2p_port))
+        grow.boot_strapper.boot_strap_node('http://localhost:%s' % str(genesis_http_port))
         producers = grow.account_factory.create_random_accounts(num_nodes, BootStrapper.token_issue * min_stake,
                                                                BootStrapper.token_issue * max_stake, 'prodname')
         grow.boot_strapper.reg_producers(producers)
