@@ -8,7 +8,6 @@ class ConfigurationParser:
         self.dict = {}
 
     def set(self, option, value):
-        print('Option: %s Value: %s' % (str(option), str(value)))
         if option not in self.dict:
             self.dict[option] = []
         if len(self.dict[option]) == 0:

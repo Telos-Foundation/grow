@@ -166,9 +166,10 @@ def single(path):
 def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port):
     """Start a private mesh of nodes"""
     try:
-        max_stake = (100 / num_nodes) / 100
+        max_stake = (100 / num_nodes) / 100 / 3
         min_stake = max_stake / 2
-        assert((max_stake * 3 * 100) <= 100)
+        total = (max_stake * 3 * 100 * 21)
+        assert(total <= 100)
 
         grow.wallet.unlock()
         grow.node_factory.start_full(path, '0.0.0.0', str(genesis_http_port), str(genesis_p2p_port))
