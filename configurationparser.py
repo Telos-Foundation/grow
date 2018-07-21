@@ -24,8 +24,13 @@ class ConfigurationParser:
             self.dict[option].append(item)
 
     def get(self, option):
+        if option in self.dict and len(self.dict[option]) > 0:
+            return self.dict[option][0]
+        return None
+
+    def getAll(self, option):
         if option in self.dict:
-            return self.dict[option].pop()
+            return self.dict[option]
         return None
 
     def removeValue(self, option, value):
@@ -71,15 +76,12 @@ class ConfigurationParser:
                     dict[option].append(value)
             self.dict = dict
 
-
-
     def write(self, path):
         with open(path, 'w') as f:
             for key in self.dict:
                 for value in self.dict[key]:
                     f.write('%s = %s\n' % (key, value))
             f.close()
-
 
     def __str__(self):
         return dumps(self.dict)

@@ -47,7 +47,7 @@ class Node:
     def start(self, delay_time=1.0):
         if not os.path.isdir(self.path):
             os.makedirs(self.path)
-        cmd = NodeFactory.nodeos_dir + ' --config-dir %s --genesis-json %s --delete-all-blocks --hard-replay-blockchain'
+        cmd = NodeFactory.nodeos_dir + ' --config-dir %s --genesis-json %s --delete-all-blocks'
         genesis_dir = join(self.path, 'genesis.json')
         print('Starting node: %s' % self.name)
         start_background_proc(cmd % (self.path, genesis_dir), log_file(join(self.path, 'stderr.txt')),
@@ -174,6 +174,7 @@ class NodeFactory:
             os.chdir(nodepath)
             config = ConfigurationParser()
             config.read(join(self.parent_dir, 'config/template_config.ini'))
+            config.set('blocks-dir', join(nodepath, 'blocks'))
             config.set('http-server-address', '0.0.0.0:' + str(self.get_open_port()))
             p2p_port = str(self.get_open_port())
             config.set('p2p-listen-endpoint', '0.0.0.0:' + p2p_port)
