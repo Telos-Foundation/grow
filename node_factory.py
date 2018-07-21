@@ -202,7 +202,7 @@ class NodeFactory:
 
         for n in nodes:
             n.set_peers(endpoints)
-            n.start()
+            n.start(0.2)
             n.get_pid()
             self.update_node_state(n)
 
@@ -305,16 +305,22 @@ class NodeFactory:
     def clear_state(self):
         self.state = {}
 
+    def kill_daemon(self):
+        for proc in psutil.process_iter():
+            if proc.name() == 'nodeos':
+                proc.kill()
+
     def delete_all_nodes(self):
         try:
             nodes = self.get_all_nodes_from_state()
+            self.kill_daemon()
             for n in nodes:
-                print('Stopping node %s...' % n.name)
-                n.stop()
-                sleep(1)
                 self.get_status(n.name)
                 if os.path.isdir(n.path):
                     rmtree(n.path)
+            for dir in os.listdir(os.getcwd()):
+                if self.folder_scheme in dir:
+                    rmtree(dir)
             self.clear_state()
             self.save()
         except FileNotFoundError as e:
