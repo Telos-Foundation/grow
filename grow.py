@@ -166,6 +166,10 @@ def single(path):
 def mesh(path, num_nodes, min_stake, max_stake):
     """Start a private mesh of nodes"""
     try:
+        percent_per_node = (max * 100) * 3
+        if percent_per_node * num_nodes > 100:
+            print('Unable to complete operation, current max value would cause overdrawn exceptions')
+            return
         grow.wallet.unlock()
         grow.node_factory.start_full(path, '0.0.0.0', str(8888), str(9876))
         grow.boot_strapper.boot_strap_node('http://localhost:%s' % str(8888))
