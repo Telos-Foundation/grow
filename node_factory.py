@@ -314,6 +314,7 @@ class NodeFactory:
         try:
             nodes = self.get_all_nodes_from_state()
             self.kill_daemon()
+            sleep(0.5)
             for n in nodes:
                 self.get_status(n.name)
                 if os.path.isdir(n.path):

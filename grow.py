@@ -100,6 +100,9 @@ class Initializer:
 
 grow = Grow()
 
+#TODO: Start a background thread that sends a number of transactions per second
+
+#TODO: Continuously test transaction receipts, log irregular activity
 
 @click.group()
 def cli():
@@ -341,14 +344,3 @@ def reset_wallet():
 
 if __name__ == '__main__':
     cli()
-
-#     if args.private_test:
-#         producer_accounts = create_random_accounts(21, (args.token_issue * 0.01), (args.token_issue * 0.02), "prodname")
-#         normal_accounts = create_random_accounts(30, (args.token_issue * 0.01), (args.token_issue * 0.02))
-#         jsonConfig['node_index'] = 30 - 1
-#         reg_producers(producer_accounts)
-#         start_all_nodes(producer_accounts)
-#         vote_producers(producer_accounts, producer_accounts)
-#         vote_producers(normal_accounts, producer_accounts)
-#         time.sleep(60)
-#         resign_all()
