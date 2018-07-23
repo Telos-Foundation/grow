@@ -5,3 +5,6 @@
 /en-*
 wallet
 .DS_Store
+venv
+.idea
+idea/*
