@@ -35,6 +35,10 @@ class Grow:
         self.account_factory = AccountFactory(self.wallet, self.teclos_dir)
         self.boot_strapper = BootStrapper(self.telos_dir, self.teclos_dir, self.host_address, self.account_factory)
 
+    def set_source_path(self, path):
+        self.jsonConfig['src-dir'] = os.path.abspath(path)
+        self.save()
+
     def set_host_address(self, address):
         self.host_address = address
 
@@ -124,6 +128,14 @@ def pull():
 @init.command()
 def update():
     grow.initializer.update()
+
+#TODO: Validate that argument given has telos folders
+@init.command('set-src')
+@click.argument('path', type=click.Path(exists=True))
+def set_src(path):
+    """Set grows telos source to an existing directory"""
+    grow.set_source_path(path)
+    print('Telos source has been set to %s' % path)
 
 
 @cli.group()
