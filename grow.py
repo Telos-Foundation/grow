@@ -130,7 +130,7 @@ def update():
     grow.initializer.update()
 
 #TODO: Validate that argument given has telos folders
-@init.command('set-src')
+@init.command('setsource')
 @click.argument('path', type=click.Path(exists=True))
 def set_src(path):
     """Set grows telos source to an existing directory"""
@@ -240,7 +240,7 @@ def status(name):
         print(e)
 
 
-@spin.command('show-output')
+@spin.command('output')
 @click.argument('name')
 def show_output(name):
     """Show node ouput of named node"""
@@ -251,7 +251,7 @@ def show_output(name):
         print(e)
 
 
-@spin.command('show-nodes')
+@spin.command('nodes')
 def show_nodes():
     """Display running nodes"""
     print(grow.node_factory.get_nodes().replace('\\', ''))
@@ -265,11 +265,11 @@ def reset():
     if i.lower() == 'yes' or i.lower() == 'y':
         grow.node_factory.delete_all_nodes()
 
-@spin.command()
-def test_port_scan():
-    """Test that socket is finding open ports"""
-    print(grow.node_factory.get_open_port())
-    grow.save()
+# @spin.command()
+# def test_port_scan():
+#     """Test that socket is finding open ports"""
+#     print(grow.node_factory.get_open_port())
+#     grow.save()
 
 
 @cli.group()
@@ -329,13 +329,13 @@ def lock():
     grow.wallet.lock()
 
 
-@wallet.command('show-keys')
+@wallet.command('keys')
 def private_keys():
     """Show public and private keys"""
     print(json.dumps(grow.wallet.get_keys(), indent=4, sort_keys=True).replace('\\', ''))
 
 
-@wallet.command('key-gen')
+@wallet.command('keygen')
 @click.option('--json-only/--json', default=False)
 def gen(json_only):
     """Create a keypair"""
