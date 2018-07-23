@@ -5,9 +5,9 @@ Grow is a Telos development tool that allows quick deployment of genesis nodes, 
 ##Resources
 
 1. [Installation](###Installation)
-2. Tour
-3. Starting a Genesis Node
-4. Starting a Private Mesh
+2. Tour (Coming Soon)
+3. Starting a Genesis Node (Coming Soon)
+4. Starting a Private Mesh (Coming Soon)
 
 ###Installation
 
