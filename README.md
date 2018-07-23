@@ -2,14 +2,14 @@
 
 Grow is a Telos development tool that allows quick deployment of genesis nodes, or private testing clusters. Grow affords users more convenient short hand commands for locking and unlock wallets, creating staked accounts on a network, or generating key pairs for later use.
 
-##Resources
+## Resources
 
 1. [Installation](###Installation)
 2. Tour (Coming Soon)
 3. Starting a Genesis Node (Coming Soon)
 4. Starting a Private Mesh (Coming Soon)
 
-###Installation
+### Installation
 
 This section will explain how to clone grow, install its dependencies, and add it to your servers .bachrc or .bash_profile shell script.
 
@@ -25,13 +25,13 @@ This section will explain how to clone grow, install its dependencies, and add i
     3. This command will install all the packages outlined in requirements.txt
     4. run `./grow.py`, to make sure you are getting the help message.
 5. Now we want to add grow to you `$PATH` variable. Please check below for your operating system.
-    1. ####Ubuntu
+    1. #### Ubuntu
         1. navigate to your home directory, `cd ~/`
         2. edit `.bashrc`, `vim .bashrc`
         3. Add the below lines to your file.
             1. `export PATH=$PATH:/{path-to-grow}/`
             2. `alias grow="grow.py"`
-    2. ####Mac OS X
+    2. #### Mac OS X
         1. navigate to your home directory, `cd ~/`
         2. edit `.bash_profile`, `vim .bash_profile`
         3. Add the below lines to your file.
