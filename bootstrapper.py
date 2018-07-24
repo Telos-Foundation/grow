@@ -57,8 +57,8 @@ class BootStrapper:
 
     def create_fund_account(self):
         a = self.account_factory.get_acc_obj('telosfundacc')
-        self.account_factory.post_sys_create(a, Asset((self.token_issue * 0.15) / 2),
-                                             Asset((self.token_issue * 0.15) / 2), Asset(1000.0000))
+        self.account_factory.post_sys_create(a, (self.token_issue * 0.15) / 2,
+                                             (self.token_issue * 0.15) / 2, 1000.0000)
         BootStrapper.transfer(self.host_address, 'eosio', a.name, Asset(1000.0000),
                  "Sending 15 percent stake and enough money to create new accounts")
 
