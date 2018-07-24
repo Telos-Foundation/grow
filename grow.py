@@ -120,9 +120,10 @@ class Initializer:
 
 grow = Grow()
 
-#TODO: Start a background thread that sends a number of transactions per second
 
-#TODO: Continuously test transaction receipts, log irregular activity
+# TODO: Start a background thread that sends a number of transactions per second
+
+# TODO: Continuously test transaction receipts, log irregular activity
 
 @click.group()
 def cli():
@@ -130,7 +131,7 @@ def cli():
 
 
 @cli.group()
-@click.option('--tag', default='developer')
+@click.option('--tag', default='Stage1.1')
 def init(tag):
     """Initialize Grow with telos source, or update an existing source"""
     grow.initializer.set_tag(tag)
@@ -153,6 +154,7 @@ def set_src(path):
     grow.set_source_path(path)
     print('Telos source has been set to %s' % path)
 
+
 @init.command('getsource')
 def print_source():
     """Print the current Telos source path"""
@@ -163,6 +165,7 @@ def print_source():
 def spin():
     """Spin up producer nodes, full nodes, and meshes using nodeos"""
     grow.setup()
+
 
 @spin.command()
 @click.argument('http-port')
@@ -185,13 +188,17 @@ def full(http_port, p2p_port, p2p_address, path, fund_account):
 
 
 @spin.command()
-@click.argument('http-address')
-@click.argument('p2p-port')
+@click.argument('producer-name')
 @click.argument('p2p-address')
+@click.argument('genesis-json-path')
+@click.argument('genesis-node-address')
+@click.option('--p2p-port', default='9876')
+@click.option('--http-port', default='8888')
 @click.option('--path', default=os.getcwd())
-def single(path):
+def single(producer_name, p2p_address, genesis_json_path, genesis_node_address, p2p_port, http_port, path):
     """Start a single producer node"""
-    print('Not implemented currently')
+    grow.node_factory.start_single(producer_name, path, p2p_address, http_port, p2p_port, genesis_node_address,
+                                   genesis_json_path)
 
 
 @spin.command()
@@ -202,18 +209,18 @@ def single(path):
 @click.option('--dist-percentage', default=90)
 def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port, dist_percentage):
     """Start a private mesh of nodes"""
-    #TODO: reserve TLOS tokens for account creation, use 10%
+    # TODO: reserve TLOS tokens for account creation, use 10%
     try:
         max_stake = (dist_percentage / num_nodes) / 100 / 3
         min_stake = max_stake / 2
         total = (max_stake * 3 * 100 * 21)
-        assert(total <= dist_percentage)
+        assert (total <= dist_percentage)
 
         grow.wallet.unlock()
         grow.node_factory.start_full(path, '0.0.0.0', str(genesis_http_port), str(genesis_p2p_port))
         grow.boot_strapper.boot_strap_node('http://localhost:%s' % str(genesis_http_port))
         producers = grow.account_factory.create_random_accounts(num_nodes, BootStrapper.token_issue * min_stake,
-                                                               BootStrapper.token_issue * max_stake, 'prodname')
+                                                                BootStrapper.token_issue * max_stake, 'prodname')
         grow.boot_strapper.reg_producers(producers)
         grow.node_factory.start_producers_by_account(producers, path)
         grow.boot_strapper.vote_producers(producers, producers)
@@ -283,10 +290,12 @@ def show_nodes():
 @spin.command('reset')
 def reset():
     """Stops and then deletes all nodes"""
-    i = input('This will stop all nodes and delete their folders, and remove state. Are you sure you want this? (Y/n)\n')
+    i = input(
+        'This will stop all nodes and delete their folders, and remove state. Are you sure you want this? (Y/n)\n')
 
     if i.lower() == 'yes' or i.lower() == 'y':
         grow.node_factory.delete_all_nodes()
+
 
 # @spin.command()
 # def test_port_scan():
@@ -333,7 +342,7 @@ def create(name, json_only, cpu, net, ram, creator):
 def snapshot(path):
     """Create all the accounts from snapshot file"""
     print('Not currently implemented')
-    #grow.account_factory.create_accounts_from_csv(path)
+    # grow.account_factory.create_accounts_from_csv(path)
 
 
 @cli.group()

@@ -15,6 +15,7 @@ from utility import run_continue
 from utility import log_file
 from utility import create_file
 from utility import tail
+from utility import get_output
 
 
 class Node:
@@ -72,6 +73,10 @@ class Node:
                 p.terminate()
         except OSError as e:
             print(e)
+
+    def get_chain_id(self):
+        j = json.loads(get_output('teclos get info'))
+        return j['chain-id']
 
     def show_output(self):
         tail(join(self.path, 'stderr.txt'))
@@ -134,6 +139,36 @@ class NodeFactory:
         j = json.loads(file_get_contents(join(self.parent_dir, 'config/genesis.json')))
         j['initial_key'] = public
         create_file(join(self.parent_dir, 'config/genesis.json'), json.dumps(j))
+
+    def start_single(self, name, path, p2p_address, http_port, p2p_port, genesis_node_address, genesis_path):
+        try:
+            nodepath = join(path, self.folder_scheme + 'genesis')
+            if not os.path.isdir(nodepath):
+                os.makedirs(nodepath)
+            os.chdir(nodepath)
+            config = ConfigurationParser()
+            config.read(join(self.parent_dir, 'config/template_config.ini'))
+            config.set('blocks-dir', join(nodepath, 'blocks'))
+            config.set('http-server-address', '0.0.0.0:' + http_port)
+            config.set('p2p-listen-endpoint', '0.0.0.0:' + p2p_port)
+            config.set('p2p-server-address', '%s:%s' % (p2p_address, p2p_port))
+            config.set('producer-name', name)
+            pair = self.wallet.create_import()
+            config.set('signature-provider', self.create_sig_provider(pair))
+            plugins = ['eosio::http_plugin', 'eosio::chain_plugin', 'eosio::chain_api_plugin',
+                       'eosio::history_plugin',
+                       'eosio::history_api_plugin', 'eosio::net_plugin', 'eosio::net_api_plugin',
+                       'eosio::producer_plugin']
+            config.append('plugin', plugins)
+            config.append('p2p-peer-address', genesis_node_address)
+            config.write(join(nodepath, 'config.ini'))
+            copyfile(genesis_path, join(nodepath, "genesis.json"))
+            node = Node(name, nodepath)
+            node.start(1.0)
+            self.update_node_state(node)
+            self.save()
+        except FileNotFoundError as e:
+            print(e)
 
     def start_full(self, path, p2p_address, http_port, p2p_port):
         try:
@@ -319,9 +354,10 @@ class NodeFactory:
                 self.get_status(n.name)
                 if os.path.isdir(n.path):
                     rmtree(n.path)
-            for dir in os.listdir(os.getcwd()):
-                if self.folder_scheme in dir:
-                    rmtree(dir)
+            if os.path.isdir(os.getcwd()):
+                for dir in os.listdir(os.getcwd()):
+                    if self.folder_scheme in dir:
+                        rmtree(dir)
             self.clear_state()
             self.save()
         except FileNotFoundError as e:
