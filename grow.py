@@ -164,7 +164,7 @@ def print_source():
 @cli.group()
 def spin():
     """Spin up producer nodes, full nodes, and meshes using nodeos"""
-    #grow.setup()
+    grow.setup()
 
 @spin.command()
 @click.argument('http-port')
@@ -210,7 +210,7 @@ def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port, dist_percentage):
         min_stake = max_stake / 2
         total = (max_stake * 3 * 100 * 21)
         assert(total <= dist_percentage)
-        
+
         grow.wallet.unlock()
         grow.node_factory.start_full(path, '0.0.0.0', str(genesis_http_port), str(genesis_p2p_port))
         grow.boot_strapper.boot_strap_node('http://localhost:%s' % str(genesis_http_port))
