@@ -98,7 +98,7 @@ class Initializer:
     def build_source(self):
         try:
             os.chdir(self.telos_dir)
-            run(['./eosio_build.sh -s %s' % ('TLOS')])
+            run(['./telos_build.sh -s %s' % ('TLOS')])
             os.chdir(join(self.telos_dir, "build"))
             run('sudo make install')
             self.reset_cwd()
