@@ -5,6 +5,7 @@ from node_factory import NodeFactory
 from account import AccountFactory
 from bootstrapper import BootStrapper
 from asset import Asset
+from sys import exit
 import click
 import json
 
@@ -28,22 +29,39 @@ class Grow:
         self.keosd_dir = join(self.telos_dir, "build/programs/keosd/keosd")
         self.teclos_dir = join(self.telos_dir, "build/programs/teclos/teclos")
         self.nodeos_dir = join(self.telos_dir, "build/programs/nodeos/nodeos")
+        self.initializer = Initializer(self.telos_dir, self.start_cwd)
+
+    def setup(self):
+        if not self.is_source_built():
+            print('Telos source either doesn\'t exist, or isn\'t initialized.')
+            exit(2)
 
         self.wallet = Wallet(self.wallet_dir, self.teclos_dir, self.telos_dir, self.keosd_dir, 999999999)
         self.node_factory = NodeFactory(self.start_cwd, self.parent_dir, self.nodeos_dir, self.wallet)
-        self.initializer = Initializer(self.telos_dir, self.start_cwd)
         self.account_factory = AccountFactory(self.wallet, self.teclos_dir)
         self.boot_strapper = BootStrapper(self.telos_dir, self.teclos_dir, self.host_address, self.account_factory)
+
+    def get_source_path(self):
+        return self.telos_dir
 
     def set_source_path(self, path):
         self.jsonConfig['src-dir'] = os.path.abspath(path)
         self.save()
 
+    def source_exists(self):
+        return os.path.isdir(self.telos_dir)
+
+    def is_source_built(self):
+        if self.source_exists():
+            return os.path.isdir(join(self.telos_dir, '/build'))
+        return False
+
     def set_host_address(self, address):
         self.host_address = address
 
     def save(self):
-        self.node_factory.save()
+        if hasattr(self, 'node_factory'):
+            self.node_factory.save()
         self.jsonConfig['host_address'] = self.host_address
         create_file(join(self.parent_dir, 'config/state.json'), json.dumps(self.jsonConfig, sort_keys=True, indent=4))
 
@@ -129,7 +147,7 @@ def pull():
 def update():
     grow.initializer.update()
 
-#TODO: Validate that argument given has telos folders
+
 @init.command('setsource')
 @click.argument('path', type=click.Path(exists=True))
 def set_src(path):
@@ -137,11 +155,16 @@ def set_src(path):
     grow.set_source_path(path)
     print('Telos source has been set to %s' % path)
 
+@init.command('getsource')
+def print_source():
+    """Print the current Telos source path"""
+    print(grow.get_source_path())
+
 
 @cli.group()
 def spin():
     """Spin up producer nodes, full nodes, and meshes using nodeos"""
-
+    #grow.setup()
 
 @spin.command()
 @click.argument('http-port')
@@ -178,14 +201,16 @@ def single(path):
 @click.argument('path', default=os.getcwd())
 @click.option('--genesis-http-port', default=8888)
 @click.option('--genesis-p2p-port', default=9876)
-def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port):
+@click.option('--dist-percentage', default=90)
+def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port, dist_percentage):
     """Start a private mesh of nodes"""
+    #TODO: reserve TLOS tokens for account creation, use 10%
     try:
-        max_stake = (100 / num_nodes) / 100 / 3
+        max_stake = (dist_percentage / num_nodes) / 100 / 3
         min_stake = max_stake / 2
         total = (max_stake * 3 * 100 * 21)
-        assert(total <= 100)
-
+        assert(total <= dist_percentage)
+        
         grow.wallet.unlock()
         grow.node_factory.start_full(path, '0.0.0.0', str(genesis_http_port), str(genesis_p2p_port))
         grow.boot_strapper.boot_strap_node('http://localhost:%s' % str(genesis_http_port))
@@ -276,6 +301,7 @@ def reset():
 @click.option('--url', default='http://localhost:8888')
 def accounts(url):
     """Create accounts on a test net"""
+    grow.setup()
     grow.account_factory.set_host_address(url)
     grow.set_host_address(url)
     grow.save()
@@ -315,6 +341,7 @@ def snapshot(path):
 @cli.group()
 def wallet():
     """Lock, unlock, and create keys"""
+    grow.setup()
 
 
 @wallet.command()
