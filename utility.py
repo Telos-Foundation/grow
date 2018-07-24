@@ -11,7 +11,7 @@ def tail(path):
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     while True:
         line = f.stdout.readline()
-        print(line)
+        print(line.decode('utf-8'))
 
 
 def jsonArg(a):

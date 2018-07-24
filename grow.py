@@ -32,9 +32,9 @@ class Grow:
         self.initializer = Initializer(self.telos_dir, self.start_cwd)
 
     def setup(self):
-        # if not self.is_source_built():
-        #     print('Telos source either doesn\'t exist, or isn\'t initialized.')
-        #     exit(2)
+        if not self.is_source_built():
+            print('Telos source either doesn\'t exist, or isn\'t initialized.')
+            exit(2)
 
         self.wallet = Wallet(self.wallet_dir, self.teclos_dir, self.telos_dir, self.keosd_dir, 999999999)
         self.node_factory = NodeFactory(self.start_cwd, self.parent_dir, self.nodeos_dir, self.wallet)
@@ -52,9 +52,8 @@ class Grow:
         return os.path.isdir(self.telos_dir)
 
     def is_source_built(self):
-        if self.source_exists():
-            return os.path.isdir(join(self.telos_dir, 'build'))
-        return False
+        print(self.telos_dir)
+        return self.source_exists() and os.path.isdir(join(self.telos_dir, 'build'))
 
     def set_host_address(self, address):
         self.host_address = address
