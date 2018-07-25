@@ -142,7 +142,7 @@ class NodeFactory:
 
     def start_single(self, name, path, p2p_address, http_port, p2p_port, genesis_node_address, genesis_path):
         try:
-            nodepath = join(path, self.folder_scheme + 'genesis')
+            nodepath = join(path, self.folder_scheme + name)
             if not os.path.isdir(nodepath):
                 os.makedirs(nodepath)
             os.chdir(nodepath)
@@ -160,7 +160,7 @@ class NodeFactory:
                        'eosio::history_api_plugin', 'eosio::net_plugin', 'eosio::net_api_plugin',
                        'eosio::producer_plugin']
             config.append('plugin', plugins)
-            config.append('p2p-peer-address', genesis_node_address)
+            config.set('p2p-peer-address', genesis_node_address)
             config.write(join(nodepath, 'config.ini'))
             copyfile(genesis_path, join(nodepath, "genesis.json"))
             node = Node(name, nodepath)
