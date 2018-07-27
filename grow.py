@@ -406,7 +406,7 @@ def getblocks(target, transactions_only):
             result = {}
             for i in range(floor, ceil):
                 o = json.loads(get_output('teclos get block %d' % i))
-                print(len(o['transcations']))
+                print(len(o['transactions']))
                 if transactions_only and len(o['transactions']) > 0:
                     result[i] = o
                 elif not transactions_only:
