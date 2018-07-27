@@ -401,7 +401,7 @@ def getblocks(target, transactions_only):
     """get blocks by number or range"""
     if '-' in target:
         floor = int(target[0: target.index('-')].strip())
-        ceil = int(target[target.index('-'): len(target)].strip())
+        ceil = int(target[target.index('-') + 1: len(target)].strip())
         print(floor)
         print(ceil)
         if ceil > floor:
