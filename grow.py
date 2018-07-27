@@ -397,11 +397,11 @@ def chain():
 @chain.command()
 @click.argument('target')
 @click.option('--transactions-only', type=bool, default=False)
-def getblocks(arg, transactions_only):
+def getblocks(target, transactions_only):
     """get blocks by number or range"""
-    if '-' in arg:
-        floor = int(arg[0 : arg.index('-')].strip())
-        ceil = int(arg[arg.index('-') : len(arg)].strip())
+    if '-' in target:
+        floor = int(target[0: target.index('-')].strip())
+        ceil = int(target[target.index('-'): len(target)].strip())
         if ceil > floor:
             result = {}
             for i in range(floor, ceil):
@@ -414,7 +414,7 @@ def getblocks(arg, transactions_only):
         else:
             print('ceil is less than floor')
     else:
-        print(get_output('teclos get block %d' % arg))
+        print(get_output('teclos get block %d' % target))
 
 
 #TODO: Setup chain actions module
