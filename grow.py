@@ -390,5 +390,31 @@ def reset_wallet():
         grow.wallet.reset()
 
 
+@cli.group()
+def chain():
+    """Short hand chain actions"""
+
+@chain.command()
+@click.argument('target')
+@click.option('--transcations-only', type=bool, default=False)
+def getblocks(arg, transactions_only):
+    """get blocks by number or range"""
+    if '-' in arg:
+        floor = int(arg[0 : arg.index('-')].strip())
+        ceil = int(arg[arg.index('-') : len(arg)].strip())
+        if ceil > floor:
+            result = {}
+            for i in range(floor, ceil):
+                result[i] = json.loads(get_output('teclos get block %d' % i))
+            print(json.dumps(result))
+        else:
+            print('ceil is less than floor')
+    else:
+        print(get_output('teclos get block %d' % arg))
+
+
+#TODO: Setup chain actions module
+#TODO: get list of producers sorted by name
+
 if __name__ == '__main__':
     cli()
