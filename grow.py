@@ -412,7 +412,7 @@ def getblocks(target, transactions_only):
                     result[i] = o
                 elif not transactions_only:
                     result[i] = o
-            print(json.dumps(result))
+            print(json.dumps(result, indent=4, sort_keys=True))
         else:
             print('ceil is less than floor')
     else:
