@@ -402,12 +402,11 @@ def getblocks(target, transactions_only):
     if '-' in target:
         floor = int(target[0: target.index('-')].strip())
         ceil = int(target[target.index('-') + 1: len(target)].strip())
-        print(floor)
-        print(ceil)
         if ceil > floor:
             result = {}
             for i in range(floor, ceil):
                 o = json.loads(get_output('teclos get block %d' % i))
+                print(len(o['transcations']))
                 if transactions_only and len(o['transactions']) > 0:
                     result[i] = o
                 elif not transactions_only:
