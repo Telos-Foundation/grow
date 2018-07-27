@@ -396,7 +396,7 @@ def chain():
 
 @chain.command()
 @click.argument('target')
-@click.option('--transcations-only', type=bool, default=False)
+@click.option('--transactions-only', type=bool, default=False)
 def getblocks(arg, transactions_only):
     """get blocks by number or range"""
     if '-' in arg:
@@ -405,7 +405,11 @@ def getblocks(arg, transactions_only):
         if ceil > floor:
             result = {}
             for i in range(floor, ceil):
-                result[i] = json.loads(get_output('teclos get block %d' % i))
+                o = json.loads(get_output('teclos get block %d' % i))
+                if transactions_only and len(o['transactions']) > 0:
+                    result[i] = o
+                elif not transactions_only:
+                    result[i] = o
             print(json.dumps(result))
         else:
             print('ceil is less than floor')
