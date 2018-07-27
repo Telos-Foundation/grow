@@ -402,6 +402,8 @@ def getblocks(target, transactions_only):
     if '-' in target:
         floor = int(target[0: target.index('-')].strip())
         ceil = int(target[target.index('-'): len(target)].strip())
+        print(floor)
+        print(ceil)
         if ceil > floor:
             result = {}
             for i in range(floor, ceil):
