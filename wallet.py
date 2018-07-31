@@ -29,7 +29,7 @@ class Wallet:
         self.teclos_dir = teclos_dir
         self.telos_dir = telos_dir
         self.keosd_dir = keosd_dir
-        self.wallet_address = 'http://127.0.0.1:8900'
+        self.wallet_address = 'http://127.0.0.1:8999'
         self.teclos_start = '%s --wallet-url %s' % (teclos_dir, self.wallet_address)
         self.unlockTimeout = unlockTimeout
         self.pid = -1
@@ -166,7 +166,7 @@ class Wallet:
             self.stop()
         os.makedirs(self.wallet_state)
         start_background_proc(
-            self.keosd_dir + ' --unlock-timeout %d --http-server-address 127.0.0.1:8900' % (self.unlockTimeout),
+            self.keosd_dir + ' --unlock-timeout %d --http-server-address 127.0.0.1:8999' % (self.unlockTimeout),
             log_file(join(self.wallet_state, 'stderr.txt')), join(self.wallet_state, 'keosd.pid'))
         sleep(.4)
 
