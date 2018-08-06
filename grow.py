@@ -326,9 +326,9 @@ def gen(count):
 @accounts.command()
 @click.argument('name')
 @click.option('--json-only/--json', default=False)
-@click.option('--cpu', type=int, default=100)
-@click.option('--net', type=int, default=100)
-@click.option('--ram', type=int, default=100)
+@click.option('--cpu', type=float, default=100)
+@click.option('--net', type=float, default=100)
+@click.option('--ram', type=float, default=100)
 @click.option('--creator', default='eosio')
 def create(name, json_only, cpu, net, ram, creator):
     """Generate a json account object, and import keys"""
@@ -343,8 +343,17 @@ def create(name, json_only, cpu, net, ram, creator):
 @click.argument('path', type=click.Path(exists=True))
 def snapshot(path):
     """Create all the accounts from snapshot file"""
-    print('Not currently implemented')
-    # grow.account_factory.create_accounts_from_csv(path)
+    #print('Not currently implemented')
+    grow.account_factory.create_accounts_from_csv(path)
+
+@accounts.command('randshot')
+@click.argument('path', type=click.Path())
+@click.option('--num-accounts', type=int, default=100)
+@click.option('--min-stake', type=int, default=10)
+@click.option('--max-stake', type=int, default=100)
+def create_random_snapshot(path, num_accounts, min_stake, max_stake):
+    """Create a snapshot of random accounts"""
+    grow.account_factory.create_random_snapshot(num_accounts, min_stake, max_stake, path)
 
 
 @cli.group()
@@ -396,8 +405,9 @@ def chain():
 
 @chain.command()
 @click.argument('target')
+@click.option('--grep')
 @click.option('--transactions-only', type=bool, default=False)
-def getblocks(target, transactions_only):
+def getblocks(target, transactions_only, grep):
     """get blocks by number or range"""
     if '-' in target:
         floor = int(target[0: target.index('-')].strip())
@@ -406,7 +416,6 @@ def getblocks(target, transactions_only):
             result = {}
             for i in range(floor, ceil):
                 o = json.loads(get_output('teclos get block %d' % i))
-                print(len(o['transactions']))
                 if transactions_only and len(o['transactions']) > 0:
                     result[i] = o
                 elif not transactions_only:
