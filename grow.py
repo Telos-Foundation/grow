@@ -407,7 +407,8 @@ def chain():
 @click.argument('target')
 @click.option('--grep')
 @click.option('--transactions-only', type=bool, default=False)
-def getblocks(target, transactions_only, grep):
+@click.option('--block-key', type=str)
+def getblocks(target, transactions_only, block_key):
     """get blocks by number or range"""
     if '-' in target:
         floor = int(target[0: target.index('-')].strip())
@@ -417,6 +418,8 @@ def getblocks(target, transactions_only, grep):
             for i in range(floor, ceil):
                 o = json.loads(get_output('teclos get block %d' % i))
                 if transactions_only and len(o['transactions']) > 0:
+                    result[i] = o
+                elif block_key in o and len(o[block_key]) > 0:
                     result[i] = o
                 elif not transactions_only:
                     result[i] = o
