@@ -405,7 +405,6 @@ def chain():
 
 @chain.command()
 @click.argument('target')
-@click.option('--grep')
 @click.option('--transactions-only', type=bool, default=False)
 @click.option('--block-key', type=str)
 def getblocks(target, transactions_only, block_key):
