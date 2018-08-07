@@ -418,9 +418,9 @@ def getblocks(target, transactions_only, block_key):
                 o = json.loads(get_output('teclos get block %d' % i))
                 if transactions_only and len(o['transactions']) > 0:
                     result[i] = o
-                elif block_key in o and len(o[block_key]) > 0:
+                elif block_key in o and o[block_key] is not None:
                     result[i] = o
-                elif not transactions_only:
+                elif not transactions_only and not block_key:
                     result[i] = o
             print(json.dumps(result, indent=4, sort_keys=True))
         else:
