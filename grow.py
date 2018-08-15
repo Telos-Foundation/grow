@@ -4,7 +4,8 @@ from wallet import Wallet
 from node_factory import NodeFactory
 from account import AccountFactory
 from bootstrapper import BootStrapper
-from asset import Asset
+from rotation_validator import RotationValidator
+from feedscanner import FeedScanner
 from sys import exit
 import click
 import json
@@ -427,6 +428,12 @@ def getblocks(target, transactions_only, block_key):
             print('ceil is less than floor')
     else:
         print(get_output('teclos get block %d' % target))
+
+@chain.command()
+@click.argument('path')
+def validate_rotations(path):
+    validator = RotationValidator('64.38.144.180', path)
+    validator.start()
 
 
 #TODO: Setup chain actions module
