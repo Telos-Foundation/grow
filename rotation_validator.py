@@ -10,7 +10,9 @@ class RotationValidator:
         self.block_count = 0
         self.producer_schedule_index = 0
         self.scanner.subscribe('Produced block', self.on_block_produced)
+        self.last_to_producer = ""
         self.producer_schedule = []
+        self.current_schedule_results = []
         self.rotations = {}
 
     def on_block_produced(self, line):
@@ -18,9 +20,9 @@ class RotationValidator:
         if len(self.producer_schedule) == 0:
             self.producer_schedule = self.get_producer_schedule()
         if self.block_count >= 12:
+            self.current_schedule_results[self.producer_schedule_index] = True
             ++self.producer_schedule_index
             self.block_count = 0
-            print(self.producer_schedule_index)
         if self.producer_schedule[self.producer_schedule_index] in line:
             ++self.block_count
             print(self.block_count)
