@@ -432,7 +432,7 @@ def getblocks(target, transactions_only, block_key):
 @chain.command()
 @click.argument('path')
 def validate_rotations(path):
-    validator = RotationValidator('64.38.144.180', path)
+    validator = RotationValidator('localhost', path)
     validator.start()
 
 
