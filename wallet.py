@@ -37,11 +37,14 @@ class Wallet:
         if forceRestart:
             self.reset()
 
+        if not self.is_running():
+            self.start_wallet()
+
         if not self.exists() and os.path.isfile(teclos_dir):
             self.create()
 
     def exists(self):
-        return os.path.isdir(self.wallet_state) and os.path.isdir(self.wallet_dir)
+        return self.is_running() and self.wallet_exists('default')
 
     def is_running(self):
         try:
@@ -102,6 +105,19 @@ class Wallet:
                 if 'default' in wallet and '*' in wallet:
                     return False
             return True
+        except ValueError as e:
+            print(e)
+        except OSError as e:
+            print(e)
+
+    def wallet_exists(self, wallet_name):
+        try:
+            o = get_output(self.teclos_start + ' wallet list')
+            j = json.loads(o[o.index(':') + 2:len(o)])
+            for wallet in j:
+                if wallet_name in wallet:
+                    return True
+            return False
         except ValueError as e:
             print(e)
         except OSError as e:
