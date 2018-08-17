@@ -179,9 +179,8 @@ class Wallet:
     def start_wallet(self):
         if self.is_running():
             self.stop()
-        if os.path.isdir(self.wallet_state):
-            os.rmdir(self.wallet_state)
-        os.makedirs(self.wallet_state)
+        if not os.path.isdir(self.wallet_state):
+            os.makedirs(self.wallet_state)
         start_background_proc(
             self.keosd_dir + ' --unlock-timeout %d --http-server-address 127.0.0.1:8999' % (self.unlockTimeout),
             log_file(join(self.wallet_state, 'stderr.txt')), join(self.wallet_state, 'keosd.pid'))
