@@ -51,7 +51,6 @@ class Wallet:
             return False
         except OSError as e:
             print(e)
-            return False
 
     def get_pid(self):
         path = join(self.wallet_state, 'keosd.pid')
@@ -77,7 +76,7 @@ class Wallet:
         self.start_wallet()
         if not os.path.exists(self.wallet_state):
             os.makedirs(self.wallet_state)
-        o = get_output(self.teclos_start + ' wallet create')
+        o = get_output(self.teclos_start + ' wallet create --to-console')
         f = open(join(self.wallet_state, 'wallet_pw.txt'), 'w')
         f.write(self.parse_pw(o))
 
@@ -149,7 +148,7 @@ class Wallet:
             print(e)
 
     def import_key(self, private_key):
-        run(self.teclos_start + ' wallet import %s' % (private_key))
+        run(self.teclos_start + ' wallet import --private-key %s' % (private_key))
 
     def parse_pw(self, o):
         try:
@@ -182,9 +181,12 @@ class Wallet:
             print(e)
 
     def kill_daemon(self):
-        for proc in psutil.process_iter():
-            if proc.name() == 'keosd':
-                proc.kill()
+        try:
+            for proc in psutil.process_iter():
+                if proc.name() == 'keosd':
+                    proc.terminate()
+        except:
+            pass
 
     def reset(self):
         self.stop()

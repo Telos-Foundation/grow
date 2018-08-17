@@ -341,9 +341,12 @@ class NodeFactory:
         self.state = {}
 
     def kill_daemon(self):
-        for proc in psutil.process_iter():
-            if proc.name() == 'nodeos':
-                proc.kill()
+        try:
+            for proc in psutil.process_iter():
+                if proc.name() == 'nodeos':
+                    proc.terminate()
+        except:
+            pass
 
     def delete_all_nodes(self):
         try:

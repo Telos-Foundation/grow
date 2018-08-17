@@ -27,7 +27,7 @@ class Grow:
         self.telos_dir = os.path.abspath('telos')
         if 'src-dir' in self.jsonConfig and self.jsonConfig['src-dir'] != '':
             self.telos_dir = os.path.abspath(self.jsonConfig['src-dir'])
-        self.keosd_dir = join(self.telos_dir, "build/programs/keosd/keosd")
+        self.keosd_dir = join(self.telos_dir, "build/programs/tkeosd/tkeosd")
         self.teclos_dir = join(self.telos_dir, "build/programs/teclos/teclos")
         self.nodeos_dir = join(self.telos_dir, "build/programs/nodeos/nodeos")
         self.initializer = Initializer(self.telos_dir, self.start_cwd)
