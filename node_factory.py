@@ -74,10 +74,6 @@ class Node:
         except OSError as e:
             print(e)
 
-    def get_chain_id(self):
-        j = json.loads(get_output('teclos get info'))
-        return j['chain-id']
-
     def show_output(self):
         tail(join(self.path, 'stderr.txt'))
 

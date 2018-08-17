@@ -21,7 +21,7 @@ class Grow:
         self.contracts_dir = "build/contracts"
         self.wallet_dir = join(self.parent_dir, 'wallet')
         self.host_address = self.jsonConfig['host_address'] if 'host_address' in self.jsonConfig and self.jsonConfig[
-            'host_address'] == "" else "http://localhost:8888"
+            'host_address'] == "" else "http://127.0.0.1:8888"
 
         self.git_tag = ''
         self.telos_dir = os.path.abspath('telos')
@@ -63,6 +63,11 @@ class Grow:
             self.node_factory.save()
         self.jsonConfig['host_address'] = self.host_address
         create_file(join(self.parent_dir, 'config/state.json'), json.dumps(self.jsonConfig, sort_keys=True, indent=4))
+
+    @staticmethod
+    def get_chain_id(self):
+        j = json.loads(get_output('teclos get info'))
+        return j['chain-id']
 
 
 class Initializer:
@@ -179,7 +184,7 @@ def full(http_port, p2p_port, p2p_address, path, fund_account):
     try:
         grow.wallet.unlock()
         grow.node_factory.start_full(path, p2p_address, http_port, p2p_port)
-        grow.boot_strapper.boot_strap_node('http://localhost:%s' % http_port)
+        grow.boot_strapper.boot_strap_node('http://127.0.0.1:%s' % http_port)
         if fund_account:
             grow.boot_strapper.create_fund_account()
     except KeyError as e:
@@ -220,7 +225,7 @@ def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port, dist_percentage, 
 
         grow.wallet.unlock()
         grow.node_factory.start_full(path, '0.0.0.0', str(genesis_http_port), str(genesis_p2p_port))
-        grow.boot_strapper.boot_strap_node('http://localhost:%s' % str(genesis_http_port))
+        grow.boot_strapper.boot_strap_node('http://127.0.0.1:%s' % str(genesis_http_port))
         producers = grow.account_factory.create_random_accounts(num_nodes, BootStrapper.token_issue * min_stake,
                                                                 BootStrapper.token_issue * max_stake, 'prodname')
         grow.boot_strapper.reg_producers(producers)
@@ -308,7 +313,7 @@ def reset():
 
 
 @cli.group()
-@click.option('--url', default='http://localhost:8888')
+@click.option('--url', default='http://127.0.0.1:8888')
 def accounts(url):
     """Create accounts on a test net"""
     grow.setup()
@@ -432,7 +437,7 @@ def getblocks(target, transactions_only, block_key):
 @chain.command()
 @click.argument('path')
 def validate_rotations(path):
-    validator = RotationValidator('localhost', path)
+    validator = RotationValidator('127.0.0.1', path)
     validator.start()
 
 

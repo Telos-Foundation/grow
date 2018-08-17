@@ -72,6 +72,7 @@ class BootStrapper:
             print(e)
 
     def set_contract(self, account_name, path, p=""):
+        print(self.host_address)
         cmd = self.teclos_dir + ' --url %s set contract %s %s'
         if p != "":
             cmd += ' -p %s' % p

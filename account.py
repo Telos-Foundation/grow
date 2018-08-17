@@ -27,7 +27,7 @@ class AccountFactory:
     def __init__(self, wallet, teclos):
         self.wallet = wallet
         self.teclos = teclos
-        self.host_address = 'http://localhost:8888'
+        self.host_address = 'http://127.0.0.1:8888'
 
     def set_host_address(self, address):
         self.host_address = address
