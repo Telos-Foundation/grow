@@ -156,7 +156,7 @@ class Wallet:
 
     def create_key(self):
         try:
-            o = get_output(self.teclos_dir + ' create key').split("\n")
+            o = get_output(self.teclos_dir + ' create key --to-console').split("\n")
             private = o[0][o[0].index(':') + 2:len(o[0])]
             public = o[1][o[1].index(':') + 2:len(o[1])]
             return KeyPair(public, private)
