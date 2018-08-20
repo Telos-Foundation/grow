@@ -1,7 +1,6 @@
 import json
 import os
 import psutil
-import psutil
 from shutil import rmtree
 from time import sleep
 from utility import join
@@ -116,6 +115,7 @@ class Wallet:
             j = json.loads(o[o.index(':') + 2:len(o)])
             for wallet in j:
                 if wallet_name in wallet:
+                    print('wallet found: ' + wallet_name)
                     return True
             return False
         except ValueError as e:
@@ -201,7 +201,7 @@ class Wallet:
         try:
             for proc in psutil.process_iter():
                 if proc.name() == 'keosd':
-                    proc.terminate()
+                    proc.kill()
         except:
             pass
 
@@ -212,4 +212,3 @@ class Wallet:
             rmtree(self.wallet_state)
         if os.path.isdir(self.wallet_dir):
             rmtree(self.wallet_dir)
-
