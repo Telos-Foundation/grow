@@ -50,6 +50,7 @@ class Wallet:
     def is_running(self):
         try:
             pid = self.get_pid()
+            print('keosd pid: ' + str(pid))
             if pid != -1:
                 return psutil.pid_exists(self.pid)
             return False
