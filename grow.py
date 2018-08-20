@@ -212,7 +212,7 @@ def single(producer_name, p2p_address, genesis_json_path, genesis_node_address, 
 @click.argument('path', default=os.getcwd())
 @click.option('--genesis-http-port', default=8888)
 @click.option('--genesis-p2p-port', default=9876)
-@click.option('--dist-percentage', default=20)
+@click.option('--dist-percentage', default=60)
 @click.option('--no-vote', type=bool, default=False)
 def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port, dist_percentage, no_vote):
     """Start a private mesh of nodes"""

@@ -125,6 +125,7 @@ class Wallet:
                 if wallet_name in wallet:
                     print('wallet found: ' + wallet_name)
                     return True
+            print("wallet not found")
             return False
         except ValueError as e:
             print(e)
