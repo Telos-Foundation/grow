@@ -37,9 +37,11 @@ class Wallet:
             self.reset()
 
         if not self.is_running():
+            print("Init start wallet function")
             self.start_wallet()
 
         if not self.exists() and os.path.isfile(teclos_dir):
+            print("Creating wallet because none exists")
             self.create()
 
     def exists(self):
@@ -80,8 +82,8 @@ class Wallet:
         return json.dumps(info)
 
     def create(self):
-        print("create()")
-        self.start_wallet()
+        if not self.is_running():
+            self.start_wallet()
         if not os.path.exists(self.wallet_state):
             os.makedirs(self.wallet_state)
         o = get_output(self.teclos_start + ' wallet create --to-console')
