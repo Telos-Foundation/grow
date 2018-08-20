@@ -37,23 +37,23 @@ class Wallet:
             self.reset()
 
         if not self.is_running():
-            print("Init start wallet function")
+            #print("Init start wallet function")
             self.start_wallet()
 
         if not self.exists() and os.path.isfile(teclos_dir):
-            print("Creating wallet because none exists")
+            #print("Creating wallet because none exists")
             self.create()
 
     def exists(self):
-        print("wallet exists: " + str(self.wallet_exists('default')))
-        print("tkeosd is running: " + str(self.is_running()))
+        #print("wallet exists: " + str(self.wallet_exists('default')))
+        #print("tkeosd is running: " + str(self.is_running()))
         return self.is_running() and self.wallet_exists('default')
 
     def is_running(self):
-        print("is_running()")
+        #print("is_running()")
         try:
             pid = self.get_pid()
-            print('keosd pid: ' + str(pid))
+            #print('keosd pid: ' + str(pid))
             if pid != -1:
                 return psutil.pid_exists(self.pid)
             return False
@@ -61,7 +61,7 @@ class Wallet:
             print(e)
 
     def get_pid(self):
-        print("get_pid()")
+        #print("get_pid()")
         path = join(self.wallet_state, 'keosd.pid')
         if os.path.isfile(path):
             pid = int(file_get_contents(path))
@@ -92,7 +92,7 @@ class Wallet:
 
     def unlock(self):
         if not self.exists():
-            print('No existing wallet, creating default wallet')
+            #print('No existing wallet, creating default wallet')
             self.create()
         elif self.is_locked():
             run(self.teclos_start + ' wallet unlock --password ' + self.get_pw())
@@ -125,7 +125,7 @@ class Wallet:
                 if wallet_name in wallet:
                     print('wallet found: ' + wallet_name)
                     return True
-            print("wallet not found")
+            #print("wallet not found")
             return False
         except ValueError as e:
             print(e)
