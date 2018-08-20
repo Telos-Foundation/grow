@@ -43,11 +43,12 @@ class Wallet:
             self.create()
 
     def exists(self):
-        print(self.wallet_exists('default'))
-        print(self.is_running())
+        print("wallet exists: " + self.wallet_exists('default'))
+        print("tkeosd is running: " + self.is_running())
         return self.is_running() and self.wallet_exists('default')
 
     def is_running(self):
+        print("is_running()")
         try:
             pid = self.get_pid()
             print('keosd pid: ' + str(pid))
@@ -58,6 +59,7 @@ class Wallet:
             print(e)
 
     def get_pid(self):
+        print("get_pid()")
         path = join(self.wallet_state, 'keosd.pid')
         if os.path.isfile(path):
             pid = int(file_get_contents(path))
@@ -78,6 +80,7 @@ class Wallet:
         return json.dumps(info)
 
     def create(self):
+        print("create()")
         self.start_wallet()
         if not os.path.exists(self.wallet_state):
             os.makedirs(self.wallet_state)
