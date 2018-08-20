@@ -43,8 +43,8 @@ class Wallet:
             self.create()
 
     def exists(self):
-        print("wallet exists: " + self.wallet_exists('default'))
-        print("tkeosd is running: " + self.is_running())
+        print("wallet exists: " + str(self.wallet_exists('default')))
+        print("tkeosd is running: " + str(self.is_running()))
         return self.is_running() and self.wallet_exists('default')
 
     def is_running(self):

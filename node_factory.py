@@ -340,7 +340,7 @@ class NodeFactory:
         try:
             for proc in psutil.process_iter():
                 if proc.name() == 'nodeos':
-                    proc.terminate()
+                    proc.kill()
         except:
             pass
 
