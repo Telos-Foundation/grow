@@ -43,6 +43,8 @@ class Wallet:
             self.create()
 
     def exists(self):
+        print(self.wallet_exists('default'))
+        print(self.is_running())
         return self.is_running() and self.wallet_exists('default')
 
     def is_running(self):
