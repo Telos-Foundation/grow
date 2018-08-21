@@ -115,6 +115,7 @@ class Wallet:
     def unlock(self, name='default'):
         try:
             if not self.is_locked():
+                print('Wallet: %s is already unlocked' % name)
                 return
             body = [name, self.get_pw(name)]
             response = self.api.wallet.unlock(body=body, params={}, headers={})
@@ -163,6 +164,8 @@ class Wallet:
         return KeyPair(array[0], array[1])
 
     def get_keys(self, name='default'):
+        if self.is_locked():
+            self.unlock()
         body = [name, self.get_pw(name)]
         response = self.api.wallet.list_keys(body=body, params={}, headers={})
         return response.body
