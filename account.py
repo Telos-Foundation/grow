@@ -33,7 +33,7 @@ class AccountFactory:
         self.host_address = address
 
     def pre_sys_create(self, a):
-        self.wallet.import_key(a.keypair.private)
+        #self.wallet.import_key(a.keypair.private)
         run(self.teclos + ' --url %s create account eosio %s %s' % (self.host_address, a.name, a.keypair.public))
 
     def post_sys_create(self, a, net, cpu, ram, creator='eosio'):

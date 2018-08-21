@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from utility import *
-from wallet import Wallet
+from new_wallet import Wallet
 from node_factory import NodeFactory
 from account import AccountFactory
 from bootstrapper import BootStrapper
@@ -37,7 +37,7 @@ class Grow:
             print('Telos source either doesn\'t exist, or isn\'t initialized.')
             exit(2)
 
-        self.wallet = Wallet(self.wallet_dir, self.teclos_dir, self.telos_dir, self.keosd_dir, 999999999)
+        self.wallet = Wallet(self.wallet_dir, self.keosd_dir)
         self.node_factory = NodeFactory(self.start_cwd, self.parent_dir, self.nodeos_dir, self.wallet)
         self.account_factory = AccountFactory(self.wallet, self.teclos_dir)
         self.boot_strapper = BootStrapper(self.telos_dir, self.teclos_dir, self.host_address, self.account_factory)
