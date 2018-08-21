@@ -1,7 +1,6 @@
 import json
 import os
 import psutil
-import psutil
 from shutil import rmtree
 from time import sleep
 from utility import join
@@ -29,7 +28,7 @@ class Wallet:
         self.teclos_dir = teclos_dir
         self.telos_dir = telos_dir
         self.keosd_dir = keosd_dir
-        self.wallet_address = 'http://127.0.0.1:8900'
+        self.wallet_address = 'http://127.0.0.1:8999'
         self.teclos_start = '%s --wallet-url %s' % (teclos_dir, self.wallet_address)
         self.unlockTimeout = unlockTimeout
         self.pid = -1
@@ -37,23 +36,32 @@ class Wallet:
         if forceRestart:
             self.reset()
 
+        if not self.is_running():
+            #print("Init start wallet function")
+            self.start_wallet()
+
         if not self.exists() and os.path.isfile(teclos_dir):
+            #print("Creating wallet because none exists")
             self.create()
 
     def exists(self):
-        return os.path.isdir(self.wallet_state) and os.path.isdir(self.wallet_dir)
+        #print("wallet exists: " + str(self.wallet_exists('default')))
+        #print("tkeosd is running: " + str(self.is_running()))
+        return self.is_running() and self.wallet_exists('default')
 
     def is_running(self):
+        #print("is_running()")
         try:
             pid = self.get_pid()
+            #print('keosd pid: ' + str(pid))
             if pid != -1:
                 return psutil.pid_exists(self.pid)
             return False
         except OSError as e:
             print(e)
-            return False
 
     def get_pid(self):
+        #print("get_pid()")
         path = join(self.wallet_state, 'keosd.pid')
         if os.path.isfile(path):
             pid = int(file_get_contents(path))
@@ -74,16 +82,17 @@ class Wallet:
         return json.dumps(info)
 
     def create(self):
-        self.start_wallet()
+        if not self.is_running():
+            self.start_wallet()
         if not os.path.exists(self.wallet_state):
             os.makedirs(self.wallet_state)
-        o = get_output(self.teclos_start + ' wallet create')
+        o = get_output(self.teclos_start + ' wallet create --to-console')
         f = open(join(self.wallet_state, 'wallet_pw.txt'), 'w')
         f.write(self.parse_pw(o))
 
     def unlock(self):
         if not self.exists():
-            print('No existing wallet, creating default wallet')
+            #print('No existing wallet, creating default wallet')
             self.create()
         elif self.is_locked():
             run(self.teclos_start + ' wallet unlock --password ' + self.get_pw())
@@ -103,6 +112,21 @@ class Wallet:
                 if 'default' in wallet and '*' in wallet:
                     return False
             return True
+        except ValueError as e:
+            print(e)
+        except OSError as e:
+            print(e)
+
+    def wallet_exists(self, wallet_name):
+        try:
+            o = get_output(self.teclos_start + ' wallet list')
+            j = json.loads(o[o.index(':') + 2:len(o)])
+            for wallet in j:
+                if wallet_name in wallet:
+                    print('wallet found: ' + wallet_name)
+                    return True
+            #print("wallet not found")
+            return False
         except ValueError as e:
             print(e)
         except OSError as e:
@@ -141,7 +165,7 @@ class Wallet:
 
     def create_key(self):
         try:
-            o = get_output(self.teclos_dir + ' create key').split("\n")
+            o = get_output(self.teclos_dir + ' create key --to-console').split("\n")
             private = o[0][o[0].index(':') + 2:len(o[0])]
             public = o[1][o[1].index(':') + 2:len(o[1])]
             return KeyPair(public, private)
@@ -149,7 +173,7 @@ class Wallet:
             print(e)
 
     def import_key(self, private_key):
-        run(self.teclos_start + ' wallet import %s' % (private_key))
+        run(self.teclos_start + ' wallet import --private-key %s' % (private_key))
 
     def parse_pw(self, o):
         try:
@@ -164,9 +188,10 @@ class Wallet:
     def start_wallet(self):
         if self.is_running():
             self.stop()
-        os.makedirs(self.wallet_state)
+        if not os.path.isdir(self.wallet_state):
+            os.makedirs(self.wallet_state)
         start_background_proc(
-            self.keosd_dir + ' --unlock-timeout %d --http-server-address 127.0.0.1:8900' % (self.unlockTimeout),
+            self.keosd_dir + ' --unlock-timeout %d --http-server-address 127.0.0.1:8999' % (self.unlockTimeout),
             log_file(join(self.wallet_state, 'stderr.txt')), join(self.wallet_state, 'keosd.pid'))
         sleep(.4)
 
@@ -182,9 +207,12 @@ class Wallet:
             print(e)
 
     def kill_daemon(self):
-        for proc in psutil.process_iter():
-            if proc.name() == 'keosd':
-                proc.kill()
+        try:
+            for proc in psutil.process_iter():
+                if proc.name() == 'keosd':
+                    proc.kill()
+        except:
+            pass
 
     def reset(self):
         self.stop()
@@ -193,4 +221,3 @@ class Wallet:
             rmtree(self.wallet_state)
         if os.path.isdir(self.wallet_dir):
             rmtree(self.wallet_dir)
-

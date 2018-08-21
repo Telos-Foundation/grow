@@ -74,10 +74,6 @@ class Node:
         except OSError as e:
             print(e)
 
-    def get_chain_id(self):
-        j = json.loads(get_output('teclos get info'))
-        return j['chain-id']
-
     def show_output(self):
         tail(join(self.path, 'stderr.txt'))
 
@@ -341,9 +337,12 @@ class NodeFactory:
         self.state = {}
 
     def kill_daemon(self):
-        for proc in psutil.process_iter():
-            if proc.name() == 'nodeos':
-                proc.kill()
+        try:
+            for proc in psutil.process_iter():
+                if proc.name() == 'nodeos':
+                    proc.kill()
+        except:
+            pass
 
     def delete_all_nodes(self):
         try:

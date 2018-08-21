@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 from utility import *
-from wallet import Wallet
+from new_wallet import Wallet
 from node_factory import NodeFactory
 from account import AccountFactory
 from bootstrapper import BootStrapper
-from asset import Asset
+from rotation_validator import RotationValidator
+from feedscanner import FeedScanner
 from sys import exit
 import click
 import json
@@ -20,13 +21,13 @@ class Grow:
         self.contracts_dir = "build/contracts"
         self.wallet_dir = join(self.parent_dir, 'wallet')
         self.host_address = self.jsonConfig['host_address'] if 'host_address' in self.jsonConfig and self.jsonConfig[
-            'host_address'] == "" else "http://localhost:8888"
+            'host_address'] == "" else "http://127.0.0.1:8888"
 
         self.git_tag = ''
         self.telos_dir = os.path.abspath('telos')
         if 'src-dir' in self.jsonConfig and self.jsonConfig['src-dir'] != '':
             self.telos_dir = os.path.abspath(self.jsonConfig['src-dir'])
-        self.keosd_dir = join(self.telos_dir, "build/programs/keosd/keosd")
+        self.keosd_dir = join(self.telos_dir, "build/programs/tkeosd/tkeosd")
         self.teclos_dir = join(self.telos_dir, "build/programs/teclos/teclos")
         self.nodeos_dir = join(self.telos_dir, "build/programs/nodeos/nodeos")
         self.initializer = Initializer(self.telos_dir, self.start_cwd)
@@ -36,7 +37,7 @@ class Grow:
             print('Telos source either doesn\'t exist, or isn\'t initialized.')
             exit(2)
 
-        self.wallet = Wallet(self.wallet_dir, self.teclos_dir, self.telos_dir, self.keosd_dir, 999999999)
+        self.wallet = Wallet(self.wallet_dir, self.keosd_dir)
         self.node_factory = NodeFactory(self.start_cwd, self.parent_dir, self.nodeos_dir, self.wallet)
         self.account_factory = AccountFactory(self.wallet, self.teclos_dir)
         self.boot_strapper = BootStrapper(self.telos_dir, self.teclos_dir, self.host_address, self.account_factory)
@@ -62,6 +63,11 @@ class Grow:
             self.node_factory.save()
         self.jsonConfig['host_address'] = self.host_address
         create_file(join(self.parent_dir, 'config/state.json'), json.dumps(self.jsonConfig, sort_keys=True, indent=4))
+
+    @staticmethod
+    def get_chain_id(self):
+        j = json.loads(get_output('teclos get info'))
+        return j['chain-id']
 
 
 class Initializer:
@@ -178,7 +184,7 @@ def full(http_port, p2p_port, p2p_address, path, fund_account):
     try:
         grow.wallet.unlock()
         grow.node_factory.start_full(path, p2p_address, http_port, p2p_port)
-        grow.boot_strapper.boot_strap_node('http://localhost:%s' % http_port)
+        grow.boot_strapper.boot_strap_node('http://127.0.0.1:%s' % http_port)
         if fund_account:
             grow.boot_strapper.create_fund_account()
     except KeyError as e:
@@ -206,8 +212,9 @@ def single(producer_name, p2p_address, genesis_json_path, genesis_node_address, 
 @click.argument('path', default=os.getcwd())
 @click.option('--genesis-http-port', default=8888)
 @click.option('--genesis-p2p-port', default=9876)
-@click.option('--dist-percentage', default=90)
-def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port, dist_percentage):
+@click.option('--dist-percentage', default=60)
+@click.option('--no-vote', type=bool, default=False)
+def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port, dist_percentage, no_vote):
     """Start a private mesh of nodes"""
     # TODO: reserve TLOS tokens for account creation, use 10%
     try:
@@ -218,12 +225,13 @@ def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port, dist_percentage):
 
         grow.wallet.unlock()
         grow.node_factory.start_full(path, '0.0.0.0', str(genesis_http_port), str(genesis_p2p_port))
-        grow.boot_strapper.boot_strap_node('http://localhost:%s' % str(genesis_http_port))
+        grow.boot_strapper.boot_strap_node('http://127.0.0.1:%s' % str(genesis_http_port))
         producers = grow.account_factory.create_random_accounts(num_nodes, BootStrapper.token_issue * min_stake,
                                                                 BootStrapper.token_issue * max_stake, 'prodname')
         grow.boot_strapper.reg_producers(producers)
         grow.node_factory.start_producers_by_account(producers, path)
-        grow.boot_strapper.vote_producers(producers, producers)
+        if not no_vote:
+            grow.boot_strapper.vote_producers(producers, producers)
     except KeyError as e:
         print(e)
     finally:
@@ -305,7 +313,7 @@ def reset():
 
 
 @cli.group()
-@click.option('--url', default='http://localhost:8888')
+@click.option('--url', default='http://127.0.0.1:8888')
 def accounts(url):
     """Create accounts on a test net"""
     grow.setup()
@@ -324,9 +332,9 @@ def gen(count):
 @accounts.command()
 @click.argument('name')
 @click.option('--json-only/--json', default=False)
-@click.option('--cpu', type=int, default=100)
-@click.option('--net', type=int, default=100)
-@click.option('--ram', type=int, default=100)
+@click.option('--cpu', type=float, default=100)
+@click.option('--net', type=float, default=100)
+@click.option('--ram', type=float, default=100)
 @click.option('--creator', default='eosio')
 def create(name, json_only, cpu, net, ram, creator):
     """Generate a json account object, and import keys"""
@@ -341,8 +349,17 @@ def create(name, json_only, cpu, net, ram, creator):
 @click.argument('path', type=click.Path(exists=True))
 def snapshot(path):
     """Create all the accounts from snapshot file"""
-    print('Not currently implemented')
-    # grow.account_factory.create_accounts_from_csv(path)
+    #print('Not currently implemented')
+    grow.account_factory.create_accounts_from_csv(path)
+
+@accounts.command('randshot')
+@click.argument('path', type=click.Path())
+@click.option('--num-accounts', type=int, default=100)
+@click.option('--min-stake', type=int, default=10)
+@click.option('--max-stake', type=int, default=100)
+def create_random_snapshot(path, num_accounts, min_stake, max_stake):
+    """Create a snapshot of random accounts"""
+    grow.account_factory.create_random_snapshot(num_accounts, min_stake, max_stake, path)
 
 
 @cli.group()
@@ -387,6 +404,45 @@ def reset_wallet():
     if i.lower() == 'yes' or i.lower() == 'y':
         grow.wallet.reset()
 
+
+@cli.group()
+def chain():
+    """Short hand chain actions"""
+
+@chain.command()
+@click.argument('target')
+@click.option('--transactions-only', type=bool, default=False)
+@click.option('--block-key', type=str)
+def getblocks(target, transactions_only, block_key):
+    """get blocks by number or range"""
+    if '-' in target:
+        floor = int(target[0: target.index('-')].strip())
+        ceil = int(target[target.index('-') + 1: len(target)].strip())
+        if ceil > floor:
+            result = {}
+            for i in range(floor, ceil):
+                o = json.loads(get_output('teclos get block %d' % i))
+                if transactions_only and len(o['transactions']) > 0:
+                    result[i] = o
+                elif block_key in o and o[block_key] is not None:
+                    result[i] = o
+                elif not transactions_only and not block_key:
+                    result[i] = o
+            print(json.dumps(result, indent=4, sort_keys=True))
+        else:
+            print('ceil is less than floor')
+    else:
+        print(get_output('teclos get block %d' % target))
+
+@chain.command()
+@click.argument('path')
+def validate_rotations(path):
+    validator = RotationValidator('127.0.0.1', path)
+    validator.start()
+
+
+#TODO: Setup chain actions module
+#TODO: get list of producers sorted by name
 
 if __name__ == '__main__':
     cli()

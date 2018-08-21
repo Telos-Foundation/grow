@@ -14,6 +14,14 @@ def tail(path):
         print(line.decode('utf-8'))
 
 
+def tail_iterator(path):
+    f = subprocess.Popen(['tail', '-F', path], \
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    while True:
+        line = f.stdout.readline()
+        yield line.decode('utf-8')
+
+
 def jsonArg(a):
     return " '" + json.dumps(a) + "' "
 
