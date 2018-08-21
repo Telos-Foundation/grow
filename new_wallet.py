@@ -8,8 +8,6 @@ from simple_rest_client.exceptions import ServerError
 from shutil import rmtree
 from time import sleep
 from utility import join
-from utility import run
-from utility import get_output
 from utility import start_background_proc
 from utility import file_get_contents
 from utility import log_file
@@ -22,6 +20,7 @@ class KeyPair:
 
     def __str__(self):
         return json.dumps({'public': self.public, 'private': self.private})
+
 
 class WalletResource(Resource):
     actions = {
@@ -61,7 +60,6 @@ class Wallet:
         self.api.add_resource(resource_name='wallet', resource_class=WalletResource)
         self.pid = -1
         if not self.is_running():
-            print('starting a new wallet')
             self.start_wallet()
 
         if not self.wallet_exists('default'):
@@ -71,14 +69,11 @@ class Wallet:
         try:
             p = psutil.Process(self.get_pid())
             if p.is_running():
-                print('wallet is running...')
                 return True
             return False
-        except psutil.ZombieProcess as e:
-            print('zombie process')
+        except psutil.ZombieProcess:
             return False
-        except psutil.NoSuchProcess as e:
-            print('no such process')
+        except psutil.NoSuchProcess:
             return False
 
     def get_pid(self):
@@ -123,14 +118,20 @@ class Wallet:
                 return
             body = [name, self.get_pw(name)]
             response = self.api.wallet.unlock(body=body, params={}, headers={})
-            return response.status_code == 200
+            if response.status_code == 200:
+                print('Wallet: %s is unlocked' % name)
+                return True
+            return False
         except ServerError as e:
             raise e
 
-    def lock(self, name):
+    def lock(self, name='default'):
         try:
             response = self.api.wallet.lock(body=name, params={}, headers={})
-            return response.status_code == 200
+            if response.status_code == 200:
+                print('Wallet: %s locked' % name)
+                return True
+            return False
         except ServerError as e:
             raise e
 
