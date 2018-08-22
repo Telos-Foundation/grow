@@ -232,10 +232,11 @@ def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port, dist_percentage, 
                                                                 BootStrapper.token_issue * max_stake, 'prodname')
         grow.boot_strapper.reg_producers(producers)
         grow.node_factory.start_producers_by_account(producers, path)
-        if not no_vote:
-            grow.boot_strapper.vote_producers(producers, producers)
-        elif vote_self:
+        if vote_self:
             grow.boot_strapper.self_vote_producers(producers, num_self_voters)
+        elif not no_vote:
+            grow.boot_strapper.vote_producers(producers, producers)
+
     except KeyError as e:
         print(e)
     finally:
