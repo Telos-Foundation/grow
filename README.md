@@ -13,7 +13,7 @@ Grow is a Telos development tool that allows quick deployment of genesis nodes, 
 
 This section will explain how to clone grow, install its dependencies, and add it to your servers .bachrc or .bash_profile shell script.
 
-1. First we need to clone grow, so go to the directory you'd like to clone grow and run `git clone https://github.com/Telos-Foundation/grow`
+1. First we need to clone grow, so go to the directory you'd like to clone grow and run `git clone https://github.com/Telos-Foundation/grow -b stage2.0`
 2. Next we need to have python 3.5 or greater installed. To check run `python3 --version`. If you don't have python3 [here](https://realpython.com/installing-python/) are the installation instructions.
 3. Now we check to make sure we have pip3, run `pip3 --version`.
     1. If pip3 gives you a version output move onto step 4, otherwise run the command specific to your OS.
