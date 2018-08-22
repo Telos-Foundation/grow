@@ -81,15 +81,24 @@ class BootStrapper:
     def push_action(self, target, action_name, json):
         run_retry(self.teclos_dir + ' --url %s push action %s %s %s' % (self.host_address, target, action_name, json))
 
-    def vote_producers(self, a_accounts, b_accounts):
+    def vote_producers(self, a_accounts, b_accounts, minimum=10, maximum=30):
         for a in a_accounts:
             cmd = self.teclos_dir + ' --url %s system voteproducer prods ' + a.name + ' '
             i = 0
             for t in b_accounts:
-                if a.name != t.name and i < randint(10, 30):
+                if a.name != t.name and i < randint(minimum, maximum):
                     cmd += t.name + " "
                     i = i + 1
             run_retry(cmd % self.host_address)
+
+    def self_vote_producers(self, a_accounts, num_accounts=10000000):
+        i = 0
+        for a in a_accounts:
+            if i < num_accounts:
+                cmd = self.teclos_dir + ' --url %s system voteproducer approve ' + a.name + ' ' + a.name
+                run_retry(cmd % self.host_address)
+                i = i + 1
+
 
     def update_auth(self, account, permission, parent, controller):
         run(self.teclos_dir + ' --url' + self.host_address + ' push action eosio updateauth' + jsonArg({

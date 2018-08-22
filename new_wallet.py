@@ -60,9 +60,11 @@ class Wallet:
         self.api.add_resource(resource_name='wallet', resource_class=WalletResource)
         self.pid = -1
         if not self.is_running():
+            print('Creating new instance of tkeosd')
             self.start_wallet()
 
         if not self.wallet_exists('default'):
+            print('Default wallet not found, creating new default wallet')
             self.create('default')
 
     def is_running(self):
@@ -107,6 +109,7 @@ class Wallet:
 
     def create(self, name):
         try:
+            print('creating a new wallet: %s' % name)
             response = self.api.wallet.create(body=name, params={}, headers={})
             self.set_pw(name, response.body)
         except ServerError as e:
@@ -117,6 +120,7 @@ class Wallet:
             if not self.is_locked():
                 print('Wallet: %s is already unlocked' % name)
                 return
+            print(self.get_pw(name))
             body = [name, self.get_pw(name)]
             response = self.api.wallet.unlock(body=body, params={}, headers={})
             if response.status_code == 200:
@@ -227,6 +231,7 @@ class Wallet:
 
     def set_pw(self, name, pw):
         try:
+            print('setting new wallet password')
             p = join(self.wallet_state, "wallet_pw.json")
             j = {}
             if not os.path.isdir(self.wallet_state):
@@ -235,9 +240,10 @@ class Wallet:
                 j = json.loads(file_get_contents(p))
             j[name] = pw
             with open(p, 'w') as pw_file:
+                print('writing new password file')
                 pw_file.write(json.dumps(j))
         except Exception as e:
-            print(e)
+            raise e
 
     def kill_daemon(self):
         try:
@@ -261,8 +267,5 @@ class Wallet:
         if not self.wallet_exists('default'):
             self.create('default')
 
-
 if __name__ == '__main__':
-    print('starting test')
-    wallet = Wallet('wallet', '/Users/hotmdev4/Desktop/telos/build/programs/tkeosd/tkeosd')
-    print(wallet.create_key())
+    wallet = Wallet('wallet', '/home/dev/telos/build/programs/tkeosd/tkeosd')

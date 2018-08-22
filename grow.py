@@ -214,7 +214,9 @@ def single(producer_name, p2p_address, genesis_json_path, genesis_node_address, 
 @click.option('--genesis-p2p-port', default=9876)
 @click.option('--dist-percentage', default=60)
 @click.option('--no-vote', type=bool, default=False)
-def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port, dist_percentage, no_vote):
+@click.option('--vote-self', type=bool, default=False)
+@click.option('--num-self-voters', type=int, default=15)
+def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port, dist_percentage, no_vote, vote_self, num_self_voters):
     """Start a private mesh of nodes"""
     # TODO: reserve TLOS tokens for account creation, use 10%
     try:
@@ -232,6 +234,8 @@ def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port, dist_percentage, 
         grow.node_factory.start_producers_by_account(producers, path)
         if not no_vote:
             grow.boot_strapper.vote_producers(producers, producers)
+        elif vote_self:
+            grow.boot_strapper.self_vote_producers(producers, num_self_voters)
     except KeyError as e:
         print(e)
     finally:

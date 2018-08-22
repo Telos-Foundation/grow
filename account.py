@@ -44,7 +44,6 @@ class AccountFactory:
         run_retry(cmd % (self.host_address, creator, a.name, a.keypair.public, net, cpu, ram))
         a.amount += cpu + net + ram
 
-
     #TODO: make sure the account name meetings TELOS normalized requirements
     def get_acc_obj(self, account_name, import_key=False):
         if import_key:
