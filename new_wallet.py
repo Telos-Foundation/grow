@@ -265,4 +265,4 @@ class Wallet:
 if __name__ == '__main__':
     print('starting test')
     wallet = Wallet('wallet', '/Users/hotmdev4/Desktop/telos/build/programs/tkeosd/tkeosd')
-    print(wallet.create_key())
+    print(wallet.create('default'))

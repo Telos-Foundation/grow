@@ -95,6 +95,28 @@ class AccountFactory:
             accounts.append(a)
         return accounts
 
+    def create_tip5_wallets_from_snapshot(self, path_to_csv, contract_account, min_tokens, max_tokens):
+        try:
+            with open(path_to_csv, 'r', newline='') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    amt = randint(min_tokens, max_tokens)
+                    self.create_allotment_tip5(contract_account, row['account_name'], Asset(amt, 'TTT', 2).__str__())
+                    self.transferfrom_tip5(contract_account, row['account_name'],
+                                               Asset(amt, 'TTT', 2).__str__())
+        except Exception as e:
+            raise e
+
+    def transferfrom_tip5(self, contract, recipient, tokens):
+        cmd = 'teclos push action transferfrom \'%s\' -p %s@active'
+        j = json.dumps({"owner": contract, "recipient": recipient, "tokens": tokens})
+        run(cmd % (j, contract))
+
+    def create_allotment_tip5(self, contract, recipient, tokens):
+        cmd = 'teclos push action allot \'%s\' -p %s@active'
+        j = json.dumps({"owner":contract,"recipient": recipient, "tokens":tokens})
+        run(cmd % (j, contract))
+
     def create_random_accounts(self, num_accounts, min, max, base="acctname"):
         accounts = []
         min = int(min)
