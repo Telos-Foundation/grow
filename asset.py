@@ -6,6 +6,11 @@ class Asset:
     def __str__(self):
         return ('%s %s') % ('%.4f'%(self.amount), self.symbol)
 
+    @staticmethod
+    def string_to_asset(string):
+        array = string.split(' ')
+        return Asset(float(array[0]), str(array[1]))
+
     def __add__(self, other):
         return Asset(self.amount + other.amount)
 

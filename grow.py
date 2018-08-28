@@ -34,6 +34,7 @@ class Grow:
 
     def setup(self):
         if not self.is_source_built():
+            print(self.telos_dir)
             print('Telos source either doesn\'t exist, or isn\'t initialized.')
             exit(2)
 
@@ -53,6 +54,7 @@ class Grow:
         return os.path.isdir(self.telos_dir)
 
     def is_source_built(self):
+        print("path exists: %s %s" % (str(os.path.isdir(join(self.telos_dir, 'build'))), join(self.telos_dir, 'build')))
         return self.source_exists() and os.path.isdir(join(self.telos_dir, 'build'))
 
     def set_host_address(self, address):
@@ -104,22 +106,22 @@ class Initializer:
     def build_source(self):
         try:
             os.chdir(self.telos_dir)
-            run(['./telos_build.sh -s %s' % ('TLOS')])
+            run('sudo ./telos_build.sh')
             os.chdir(join(self.telos_dir, "build"))
-            run('sudo make install')
+            run('sudo ./telos_install.sh')
             self.reset_cwd()
         except IOError as e:
             print(e)
 
     def update(self):
         try:
-            os.chdir(join(self.telos_dir, 'telos'))
-            run('git stash')
+            os.chdir(self.telos_dir)
+            run('git checkout .')
             run('git pull origin master')
             run('git checkout %s' % (self.git_tag))
             run('git submodule update --init --recursive')
             self.reset_cwd()
-            self.build_eos()
+            self.build_source()
         except IOError as e:
             print(e)
 
