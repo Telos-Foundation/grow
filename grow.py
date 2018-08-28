@@ -106,9 +106,9 @@ class Initializer:
     def build_source(self):
         try:
             os.chdir(self.telos_dir)
-            run(['./telos_build.sh -s %s' % ('TLOS')])
+            run(['./telos_build.sh'])
             os.chdir(join(self.telos_dir, "build"))
-            run('sudo make install')
+            run('sudo ./telos_install.sh')
             self.reset_cwd()
         except IOError as e:
             print(e)
@@ -116,7 +116,7 @@ class Initializer:
     def update(self):
         try:
             os.chdir(self.telos_dir)
-            run('git stash')
+            run('git checkout .')
             run('git pull origin master')
             run('git checkout %s' % (self.git_tag))
             run('git submodule update --init --recursive')
@@ -139,7 +139,7 @@ def cli():
 
 
 @cli.group()
-@click.option('--tag', default='Stage1.1')
+@click.option('--tag', default='Stage2.0')
 def init(tag):
     """Initialize Grow with telos source, or update an existing source"""
     grow.initializer.set_tag(tag)
