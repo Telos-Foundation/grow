@@ -54,7 +54,6 @@ class Grow:
         return os.path.isdir(self.telos_dir)
 
     def is_source_built(self):
-        print("path exists: %s %s" % (str(os.path.isdir(join(self.telos_dir, 'build'))), join(self.telos_dir, 'build')))
         return self.source_exists() and os.path.isdir(join(self.telos_dir, 'build'))
 
     def set_host_address(self, address):

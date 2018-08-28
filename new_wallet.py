@@ -62,6 +62,8 @@ class Wallet:
         if not self.is_running():
             print('Creating new instance of tkeosd')
             self.start_wallet()
+        else:
+            print('Wallet is running...')
 
         if not self.wallet_exists('default'):
             print('Default wallet not found, creating new default wallet')
@@ -69,9 +71,10 @@ class Wallet:
 
     def is_running(self):
         try:
-            p = psutil.Process(self.get_pid())
-            if p.is_running():
-                return True
+            if self.get_pid():
+                p = psutil.Process()
+                if p.is_running():
+                    return True
             return False
         except psutil.ZombieProcess:
             return False
@@ -84,7 +87,7 @@ class Wallet:
             pid = int(file_get_contents(path))
             self.pid = pid
             return pid
-        return 0
+        return None
 
     def stop(self):
         try:
@@ -216,7 +219,7 @@ class Wallet:
         start_background_proc(
             self.keosd_dir + ' --unlock-timeout %d --http-server-address 127.0.0.1:8999' % (self.unlockTimeout),
             log_file(join(self.wallet_state, 'stderr.txt')), join(self.wallet_state, 'keosd.pid'))
-        sleep(.4)
+        sleep(.8)
 
     def get_pw(self, name):
         try:

@@ -1,6 +1,7 @@
 from simple_rest_client.api import API
 from simple_rest_client.resource import Resource
 from simple_rest_client.exceptions import ServerError
+from utility import todict
 
 
 class WalletResource(Resource):
@@ -17,7 +18,8 @@ class WalletResource(Resource):
         'set_timeout': {'method': 'POST', 'url': 'set_timeout'},
         'set_dir': {'method': 'POST', 'url': 'set_dir'},
         'set_eosio_key': {'method': 'POST', 'url': 'set_eosio_key'},
-        'create_key': {'method': 'POST', 'url': 'create_key'}
+        'create_key': {'method': 'POST', 'url': 'create_key'},
+        'sign_transaction': {'method': 'POST', 'url': 'sign_transaction'}
     }
 
 
@@ -84,6 +86,12 @@ class WalletAPI:
             return response.body
 
     @staticmethod
+    def get_public_keys():
+        response = WalletAPI.api.wallet.get_public_keys(body={}, params={}, headers={})
+        if response.status_code == 200:
+            return response.body
+
+    @staticmethod
     def create_key(key_type="K1", name="default"):
         try:
             body = [name, key_type]
@@ -99,6 +107,34 @@ class WalletAPI:
             body = [name, private_key]
             response = WalletAPI.api.wallet.import_key(body=body, params={}, headers={})
             if response.body == 200:
+                return response.body
+        except ServerError as e:
+            raise e
+
+    @staticmethod
+    def set_timeout(time_out):
+        try:
+            response = WalletAPI.api.wallet.set_timeout(body=time_out, params={}, headers={})
+            if response.body == 200:
+                return response.body
+        except ServerError as e:
+            raise e
+
+    @staticmethod
+    def set_timeout(time_out):
+        try:
+            response = WalletAPI.api.wallet.set_timeout(body=time_out, params={}, headers={})
+            if response.body == 200:
+                return response.body
+        except ServerError as e:
+            raise e
+
+    @staticmethod
+    def sign_transaction(transaction, keys, id=""):
+        try:
+            body = [todict(transaction), keys, id]
+            response = WalletAPI.api.wallet.sign_transaction(body=body, params={}, headers={})
+            if response.status_code == 201:
                 return response.body
         except ServerError as e:
             raise e

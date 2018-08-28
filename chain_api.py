@@ -1,17 +1,14 @@
 import json
-import os
-import psutil
 import logging
+from datetime import datetime
+from datetime import timedelta
 from simple_rest_client.api import API
 from simple_rest_client.resource import Resource
 from simple_rest_client.exceptions import ServerError
-from asset import Asset
-from shutil import rmtree
-from time import sleep
-from utility import join
-from utility import start_background_proc
-from utility import file_get_contents
-from utility import log_file
+from simple_rest_client.exceptions import ClientConnectionError
+from wallet_api import WalletAPI
+from utility import todict
+from http.client import RemoteDisconnected
 
 
 class ChainResource(Resource):
@@ -37,13 +34,41 @@ class ChainResource(Resource):
 
 
 class Transaction:
-
-    def __init__(self, ref_block_num, ref_block_prefix, expiration, actions):
+    def __init__(self, *initial_data, **kwargs):
         """Transaction"""
-        self.ref_block_num = ref_block_num
-        self.ref_block_prefix = ref_block_prefix
-        self.expiration = expiration
-        self.actions = actions
+        self.expiration = (datetime.utcnow() + timedelta(minutes=2)).isoformat()
+        self.ref_block_num = 0
+        self.ref_block_prefix = 0
+        self.max_net_usage_words = 0
+        self.max_cpu_usage_ms = 0
+        self.delay_sec = 0
+        self.context_free_actions = []
+        self.context_free_data = []
+        self.actions = []
+        self.signatures = []
+
+        for dictionary in initial_data:
+            for key in dictionary:
+                setattr(self, key, dictionary[key])
+        for key in kwargs:
+            setattr(self, key, kwargs[key])
+
+        if self.ref_block_num != 0:
+            self.ref_block_num = self.get_ref_block_num()
+
+        if self.ref_block_prefix != 0:
+            self.ref_block_prefix = self.get_ref_block_prefix(self.ref_block_num)
+
+    def add_action(self, action):
+        if not self.actions:
+            self.actions = []
+        self.actions.append(action)
+
+    def get_ref_block_num(self):
+        return ChainAPI.get_info()['head_block_num']
+
+    def get_ref_block_prefix(self, block_num):
+        return ChainAPI.get_block(block_num)['ref_block_prefix']
 
     # trans.send()
 
@@ -66,11 +91,16 @@ class Authority:
 
 class Action:
 
-    def __init__(self, account, data):
+    def __init__(self, account, action_name, data):
         """Action is used in pushing transactions to the RPC API"""
-        self.account = account              # NOTE: Account, is the account_name the contract is set on.
-        self.authorization = ''             # NOTE: Authorization is the permission_level used for the action
-        self.data = data                    # NOTE: Data is the binargs received from abi_json_to_bin RPC
+        self.account = account  # NOTE: code, is the account_name the contract is set on.
+        self.name = action_name
+        self.authorization = []  # NOTE: Authorization is the permission_level used for the action
+        self.data = data  # NOTE: Data is the binargs received from abi_json_to_bin RPC
+
+    def add_authorization(self, authority):
+        # TODO: Validate given authority s
+        self.authorization.append(authority)
 
     # action.validate()
 
@@ -85,9 +115,7 @@ class ActionData:
 
     def get_action(self):
         binargs = ChainAPI.abi_json_to_bin(self.__dict__)
-        print(binargs)
-        return Action(self.code, binargs['binargs'])
-
+        return Action(self.code, self.action, binargs['binargs'])
 
 
 class ChainAPI:
@@ -109,13 +137,12 @@ class ChainAPI:
         ChainAPI.api.add_resource(resource_name='chain', resource_class=ChainResource)
 
     @staticmethod
-    def get_currency_balance(account, symbol='TLOS'):
+    def get_currency_balance(account, code='eosio.token', symbol='TLOS'):
         try:
-            body = {'code': 'eosio.token', 'account': account, 'symbol': symbol}
+            body = {'code': code, 'account': account, 'symbol': symbol}
             response = ChainAPI.api.chain.get_currency_balance(body=body, params={}, headers={})
-            if response.status_code == 200 and len(response.body) > 0:
-                return Asset.string_to_asset(response.body[0])
-            return Asset(0, 'TTT')
+            if response.status_code == 200:
+                return response.body
         except ServerError as e:
             raise e
 
@@ -179,7 +206,6 @@ class ChainAPI:
     @staticmethod
     def abi_json_to_bin(action_data):
         try:
-            print(action_data)
             response = ChainAPI.api.chain.abi_json_to_bin(body=action_data, params={}, headers={})
             if response.status_code == 200:
                 return response.body
@@ -236,21 +262,44 @@ class ChainAPI:
         except ServerError as e:
             raise e
 
-    # NOTE: Doesn't support context free actions
     @staticmethod
-    def push_transaction(actions, signatures, max_net_usage_words=0, max_cpu_usage_ms=0, delay=0):
+    def get_required_keys(transaction, available_keys):
         try:
-            chain_info = ChainAPI.get_info()
-            block_header_info = ChainAPI.get_block(chain_info['head_block_num'])
-            block_num = chain_info['head_block_num']
-            ref_block_prefix = block_header_info['ref_block_prefix']
+            body = {'transaction': todict(transaction), 'available_keys': available_keys, 'compression': 'none'}
+            response = ChainAPI.api.chain.get_required_keys(body=body, params={}, headers={})
+            if response.status_code == 200:
+                return response.body
         except ServerError as e:
             raise e
+
+    # NOTE: Doesn't support context free actions
+    @staticmethod
+    def push_transaction(transaction):
+        try:
+            response = ChainAPI.api.chain.push_transactions(body=transaction, params={}, headers={})
+            print(response)
+            if response.status_code == 200:
+                return response.body
+        except ServerError as e:
+            raise e
+        except ClientConnectionError as e:
+            print('remote disconnected')
 
     # TODO: Create exception handler
 
 
 if __name__ == '__main__':
-    ChainAPI.configure('http://64.38.144.179:8888')
-    action_data = ActionData('eosio.token', 'transfer', {'from': 'eosio', 'to': 'goodblockio1', 'quantity': '1000.0000 TLOS', 'memo': 'for testing or whatever'})
-    action_data.get_action()
+    ChainAPI.configure('http://127.0.0.1:8888')
+    WalletAPI.configure()
+    action_data = ActionData('eosio.token', 'transfer',
+                             {'from': 'eosio', 'to': 'goodblockio1', 'quantity': '1000.0000 TLOS',
+                              'memo': 'for testing or whatever'})
+    action = action_data.get_action()
+    action.add_authorization(Authority('eosio', 'active'))
+    trans = Transaction()
+    trans.add_action(action)
+    keys = WalletAPI.get_public_keys()
+    key_for_signing = ChainAPI.get_required_keys(trans, keys)
+    signed_transaction = WalletAPI.sign_transaction(trans, key_for_signing['required_keys'])
+    receipt = ChainAPI.push_transaction(signed_transaction)
+    print(receipt)
