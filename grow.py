@@ -24,13 +24,13 @@ class Grow:
             'host_address'] == "" else "http://127.0.0.1:8888"
 
         self.git_tag = ''
-        self.telos_dir = os.path.abspath('telos')
+        self.telos_dir = self.start_cwd
         if 'src-dir' in self.jsonConfig and self.jsonConfig['src-dir'] != '':
             self.telos_dir = os.path.abspath(self.jsonConfig['src-dir'])
         self.keosd_dir = join(self.telos_dir, "build/programs/tkeosd/tkeosd")
         self.teclos_dir = join(self.telos_dir, "build/programs/teclos/teclos")
         self.nodeos_dir = join(self.telos_dir, "build/programs/nodeos/nodeos")
-        self.initializer = Initializer(self.telos_dir, self.start_cwd)
+        self.initializer = Initializer(self.telos_dir, self.start_cwd, self)
 
     def setup(self):
         if not self.is_source_built():
@@ -74,11 +74,12 @@ class Grow:
 
 class Initializer:
 
-    def __init__(self, telos, cwd):
-        self.git_tag = 'developer'
+    def __init__(self, telos, cwd, grow):
+        self.git_tag = 'stage2.0'
         self.telos_dir = telos
         self.telos_repo_url = "https://github.com/Telos-Foundation/telos.git"
         self.start_cwd = cwd
+        self.grow = grow
 
     def set_tag(self, tag):
         self.git_tag = tag
@@ -88,17 +89,12 @@ class Initializer:
 
     def pull(self):
         try:
-            if os.path.exists(self.telos_dir):
-                print("Path exists.")
-                return
-            dir = os.path.abspath(join(self.telos_dir, '..'))
-            os.chdir(dir)
-            run(['git clone %s --recursive' % self.telos_repo_url])
-            os.chdir(self.telos_dir)
-            if self.git_tag != "":
-                run(['git', 'checkout', '-f', self.git_tag], False)
-            run('git submodule update --init --recursive')
-            self.reset_cwd()
+            os.chdir(self.start_cwd)
+            run(['git clone %s -b %s --recursive' % (self.git_tag, self.telos_repo_url)])
+            path = join(self.start_cwd, 'telos')
+            self.telos_dir = path
+            grow.set_source_path(path)
+            self.grow.save()
             self.build_source()
         except OSError as e:
             print(e)
