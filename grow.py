@@ -139,7 +139,7 @@ def cli():
 
 
 @cli.group()
-@click.option('--tag', default='Stage2.0')
+@click.option('--tag', default='stage2.0')
 def init(tag):
     """Initialize Grow with telos source, or update an existing source"""
     grow.initializer.set_tag(tag)
