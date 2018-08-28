@@ -67,7 +67,7 @@ class Grow:
         create_file(join(self.parent_dir, 'config/state.json'), json.dumps(self.jsonConfig, sort_keys=True, indent=4))
 
     @staticmethod
-    def get_chain_id(self):
+    def get_chain_id():
         j = json.loads(get_output('teclos get info'))
         return j['chain-id']
 
@@ -103,7 +103,6 @@ class Initializer:
         try:
             os.chdir(self.telos_dir)
             run('sudo ./telos_build.sh')
-            os.chdir(join(self.telos_dir, "build"))
             run('sudo ./telos_install.sh')
             self.reset_cwd()
         except IOError as e:
@@ -143,6 +142,7 @@ def init(tag):
 
 @init.command()
 def pull():
+    """Pull the telos source into the current working directory"""
     grow.initializer.pull()
 
 
