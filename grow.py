@@ -115,7 +115,7 @@ class Initializer:
 
     def update(self):
         try:
-            os.chdir(join(self.telos_dir, 'telos'))
+            os.chdir(self.telos_dir)
             run('git stash')
             run('git pull origin master')
             run('git checkout %s' % (self.git_tag))
