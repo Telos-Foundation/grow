@@ -90,7 +90,7 @@ class Initializer:
     def pull(self):
         try:
             os.chdir(self.start_cwd)
-            run(['git clone %s -b %s --recursive' % (self.git_tag, self.telos_repo_url)])
+            run(['git clone %s -b %s --recursive' % (self.telos_repo_url, self.git_tag)])
             path = join(self.start_cwd, 'telos')
             self.telos_dir = path
             grow.set_source_path(path)
