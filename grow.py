@@ -121,7 +121,7 @@ class Initializer:
             run('git checkout %s' % (self.git_tag))
             run('git submodule update --init --recursive')
             self.reset_cwd()
-            self.build_eos()
+            self.build_source()
         except IOError as e:
             print(e)
 
