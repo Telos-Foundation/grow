@@ -55,7 +55,7 @@ class Wallet:
             },
             timeout=2,
             append_slash=False,
-            json_encode_body=True,
+            json_encode_body=True
         )
         self.api.add_resource(resource_name='wallet', resource_class=WalletResource)
         self.pid = -1
@@ -268,4 +268,6 @@ class Wallet:
             self.create('default')
 
 if __name__ == '__main__':
-    wallet = Wallet('wallet', '/home/dev/telos/build/programs/tkeosd/tkeosd')
+    print('starting test')
+    wallet = Wallet('wallet', '/Users/hotmdev4/Desktop/telos/build/programs/tkeosd/tkeosd')
+    print(wallet.create('default'))
