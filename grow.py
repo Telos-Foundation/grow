@@ -106,7 +106,7 @@ class Initializer:
     def build_source(self):
         try:
             os.chdir(self.telos_dir)
-            run(['./telos_build.sh'])
+            run('sudo ./telos_build.sh')
             os.chdir(join(self.telos_dir, "build"))
             run('sudo ./telos_install.sh')
             self.reset_cwd()
