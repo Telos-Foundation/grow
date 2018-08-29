@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from utility import *
-from new_wallet import Wallet
+from wallet import Wallet
 from node_factory import NodeFactory
 from account import AccountFactory
 from bootstrapper import BootStrapper

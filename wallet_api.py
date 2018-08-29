@@ -1,140 +1,111 @@
-from simple_rest_client.api import API
-from simple_rest_client.resource import Resource
-from simple_rest_client.exceptions import ServerError
 from utility import todict
-
-
-class WalletResource(Resource):
-    actions = {
-        'open': {'method': 'POST', 'url': 'open'},
-        'create': {'method': 'POST', 'url': 'create'},
-        'lock': {'method': 'POST', 'url': 'lock'},
-        'lock_all': {'method': 'POST', 'url': 'lock_all'},
-        'unlock': {'method': 'POST', 'url': 'unlock'},
-        'import_key': {'method': 'POST', 'url': 'import_key'},
-        'list_wallets': {'method': 'POST', 'url': 'list_wallets'},
-        'list_keys': {'method': 'POST', 'url': 'list_keys'},
-        'get_public_keys': {'method': 'POST', 'url': 'get_public_keys'},
-        'set_timeout': {'method': 'POST', 'url': 'set_timeout'},
-        'set_dir': {'method': 'POST', 'url': 'set_dir'},
-        'set_eosio_key': {'method': 'POST', 'url': 'set_eosio_key'},
-        'create_key': {'method': 'POST', 'url': 'create_key'},
-        'sign_transaction': {'method': 'POST', 'url': 'sign_transaction'}
-    }
+import requests
+import json
+from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectTimeout
 
 
 class WalletAPI:
-    api = ''
-
-    @staticmethod
-    def configure():
-        WalletAPI.api = API(
-            api_root_url='http://127.0.0.1:8999/v1/wallet',
-            params={},
-            headers={
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            timeout=2,
-            append_slash=False,
-            json_encode_body=True
-        )
-        WalletAPI.api.add_resource(resource_name='wallet', resource_class=WalletResource)
+    base_url = 'http://127.0.0.1:8999/v1/wallet/'
+    base_headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    }
 
     @staticmethod
     def create(name):
         try:
-            response = WalletAPI.api.wallet.create(body=name, params={}, headers={})
+            response = requests.post(url=WalletAPI.base_url + 'create', data=name, headers=WalletAPI.base_headers)
             if response.status_code == 200:
-                return response.body
-        except ServerError as e:
+                return response.json()
+        except ConnectionError as e:
             raise e
 
     @staticmethod
     def unlock(self, name='default'):
         try:
-            body = [name, self.get_pw(name)]
-            response = WalletAPI.api.wallet.unlock(body=body, params={}, headers={})
+            body = json.dumps([name, self.get_pw(name)])
+            response = requests.post(url=WalletAPI.base_url + 'unlock', data=body, headers=WalletAPI.base_headers)
             if response.status_code == 200:
-                return response.body
-        except ServerError as e:
+                return response.json()
+        except ConnectionError as e:
             raise e
 
     @staticmethod
     def lock(name='default'):
         try:
-            response = WalletAPI.api.wallet.lock(body=name, params={}, headers={})
+            response = requests.post(url=WalletAPI.base_url + 'lock', data=name, headers=WalletAPI.base_headers)
             if response.status_code == 200:
-                response.body
-        except ServerError as e:
+                response.json()
+        except ConnectionError as e:
             raise e
 
     @staticmethod
     def list_wallets():
         try:
-            response = WalletAPI.api.wallet.list_wallets(body={}, params={}, headers={})
+            response = requests.post(url=WalletAPI.base_url + 'list_wallets', headers=WalletAPI.base_headers)
             if response.status_code == 200:
-                return response.body
-        except ServerError as e:
+                return response.json()
+        except ConnectionError as e:
             raise e
 
     @staticmethod
     def list_keys(password, name='default'):
-        body = [name, password]
-        response = WalletAPI.api.wallet.list_keys(body=body, params={}, headers={})
-        if response.status_code == 200:
-            return response.body
+        try:
+            body = json.dumps([name, password])
+            response = requests.post(url=WalletAPI.base_url + 'list_keys', data=body, headers=WalletAPI.base_headers)
+            if response.status_code == 200:
+                return response.json()
+        except ConnectionError as e:
+            raise e
 
     @staticmethod
     def get_public_keys():
-        response = WalletAPI.api.wallet.get_public_keys(body={}, params={}, headers={})
-        if response.status_code == 200:
-            return response.body
+        try:
+            response = requests.post(url=WalletAPI.base_url + 'get_public_keys',
+                                     headers=WalletAPI.base_headers)
+            if response.status_code == 200:
+                return response.json()
+        except ConnectionError as e:
+            raise e
 
     @staticmethod
     def create_key(key_type="K1", name="default"):
         try:
-            body = [name, key_type]
-            response = WalletAPI.api.wallet.create_key(body=body, params={}, headers={})
+            body = json.dumps([name, key_type])
+            response = requests.post(url=WalletAPI.base_url + 'create_key', data=body, headers=WalletAPI.base_headers)
             if response.status_code == 200:
-                return response.body
-        except ServerError as e:
+                return response.json()
+        except ConnectionError as e:
             raise e
 
     @staticmethod
     def import_key(private_key, name='default'):
         try:
-            body = [name, private_key]
-            response = WalletAPI.api.wallet.import_key(body=body, params={}, headers={})
+            body = json.dumps([name, private_key])
+            response = requests.post(url=WalletAPI.base_url + 'import_key', data=body, headers=WalletAPI.base_headers)
             if response.body == 200:
-                return response.body
-        except ServerError as e:
+                return response.json()
+        except ConnectionError as e:
             raise e
 
     @staticmethod
     def set_timeout(time_out):
         try:
-            response = WalletAPI.api.wallet.set_timeout(body=time_out, params={}, headers={})
+            response = requests.post(url=WalletAPI.base_url + 'set_timeout', data=time_out,
+                                     headers=WalletAPI.base_headers)
             if response.body == 200:
-                return response.body
-        except ServerError as e:
+                return response.json()
+        except ConnectionError as e:
             raise e
 
     @staticmethod
-    def set_timeout(time_out):
+    def sign_transaction(transaction, keys, chain_id=""):
         try:
-            response = WalletAPI.api.wallet.set_timeout(body=time_out, params={}, headers={})
-            if response.body == 200:
-                return response.body
-        except ServerError as e:
-            raise e
-
-    @staticmethod
-    def sign_transaction(transaction, keys, id=""):
-        try:
-            body = [todict(transaction), keys, id]
-            response = WalletAPI.api.wallet.sign_transaction(body=body, params={}, headers={})
+            body = json.dumps([todict(transaction), keys, chain_id])
+            response = requests.post(url=WalletAPI.base_url + 'sign_transaction', data=body,
+                                     headers=WalletAPI.base_headers)
             if response.status_code == 201:
-                return response.body
-        except ServerError as e:
+                return response.json()
+        except ConnectionError as e:
             raise e
