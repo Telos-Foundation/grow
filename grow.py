@@ -105,22 +105,22 @@ class Initializer:
     def build_source(self):
         try:
             os.chdir(self.telos_dir)
-            run(['./telos_build.sh -s %s' % ('TLOS')])
+            run('sudo ./telos_build.sh')
             os.chdir(join(self.telos_dir, "build"))
-            run('sudo make install')
+            run('sudo ./telos_install.sh')
             self.reset_cwd()
         except IOError as e:
             print(e)
 
     def update(self):
         try:
-            os.chdir(join(self.telos_dir, 'telos'))
-            run('git stash')
+            os.chdir(self.telos_dir)
+            run('git checkout .')
             run('git pull origin master')
             run('git checkout %s' % (self.git_tag))
             run('git submodule update --init --recursive')
             self.reset_cwd()
-            self.build_eos()
+            self.build_source()
         except IOError as e:
             print(e)
 
