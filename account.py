@@ -70,8 +70,9 @@ class AccountFactory:
 
     def threaded_snapshot_injection(self, num_threads, path_to_csv):
         with open(path_to_csv, 'r') as csvfile:
-            reader = list(csv.reader(csvfile))
-            size = int(len(reader) - 1 / num_threads)
+            reader = [{k: v for k, v in row.items()}
+                 for row in csv.DictReader(csvfile, skipinitialspace=True)]
+            size = int((len(reader) - 1) / num_threads)
             curr = 0
             threads = []
             for i in range(0, num_threads):
