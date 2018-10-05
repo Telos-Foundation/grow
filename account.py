@@ -7,6 +7,7 @@ from asset import Asset
 from random import randint
 from wallet import KeyPair
 from bootstrapper import BootStrapper
+import threading
 
 
 class Account:
@@ -19,7 +20,7 @@ class Account:
         return json.dumps({'name': self.name, 'pair': str(self.keypair)})
 
     def toDict(self):
-        return { 'account_name': self.name, 'public_key': self.keypair.public, 'private_key': self.keypair.private, 'amount': self.amount }
+        return {'account_name': self.name, 'public_key': self.keypair.public, 'private_key': self.keypair.private, 'amount': self.amount}
 
 
 class AccountFactory:
@@ -34,6 +35,7 @@ class AccountFactory:
 
     def pre_sys_create(self, a):
         #self.wallet.import_key(a.keypair.private)
+        print(self.host_address)
         run(self.teclos + ' --url %s create account eosio %s %s' % (self.host_address, a.name, a.keypair.public))
 
     def post_sys_create(self, a, net, cpu, ram, creator='eosio'):
@@ -65,6 +67,34 @@ class AccountFactory:
                     writer.writerow(account.toDict())
         except Exception as e:
             raise e
+
+    def threaded_snapshot_injection(self, num_threads, path_to_csv):
+        with open(path_to_csv, 'r') as csvfile:
+            reader = list(csv.reader(csvfile))
+            size = int(len(reader) - 1 / num_threads)
+            curr = 0
+            threads = []
+            for i in range(0, num_threads):
+                input = reader[curr: size * (i + 1)]
+                curr += size
+                thread = threading.Thread(target=self.create_accounts_from_input, args=input)
+                thread.start()
+                threads.append(thread)
+
+
+    def create_accounts_from_input(self, input):
+        i = 0
+        for row in input:
+            if i == 0:
+                i = i + 1
+                continue
+            amt = float(row['token_amt'])
+            liquid = 0.1000 if amt < 3.0000 else 10.0000 if amt > 11.000 else 2.0000
+            remainder = amt - liquid
+            cpu = remainder / 2
+            net = remainder - cpu
+            a = Account(row['name'], KeyPair(row['telos_key'], ''))
+            self.post_sys_create(a, net, cpu, 0.03)
 
     def create_accounts_from_csv(self, path_to_csv):
         try:
@@ -139,3 +169,4 @@ class AccountFactory:
             BootStrapper.transfer(self.host_address, 'eosio', a.name, toTransfer, "Initial TLOS Liquid")
             a.amount += toTransfer
             yield a
+

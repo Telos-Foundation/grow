@@ -41,10 +41,13 @@ class Node:
             return pid
         return -1
 
-    def start(self, delay_time=1.0):
+    def start(self, delay_time=1.0, flags={}):
+        print(flags)
         if not os.path.isdir(self.path):
             os.makedirs(self.path)
         cmd = NodeFactory.nodeos_dir + ' --config-dir %s --genesis-json %s --delete-all-blocks'
+        for key in flags:
+            cmd += " --{} {}".format(key, flags[key])
         genesis_dir = join(self.path, 'genesis.json')
         print('Starting node: %s' % self.name)
         start_background_proc(cmd % (self.path, genesis_dir), log_file(join(self.path, 'stderr.txt')),
@@ -162,8 +165,9 @@ class NodeFactory:
         except FileNotFoundError as e:
             print(e)
 
-    def start_full(self, path, p2p_address, http_port, p2p_port):
+    def start_full(self, path, p2p_address, http_port, p2p_port, a_plugins=[]):
         try:
+            flags = {}
             nodepath = join(path, self.folder_scheme + 'genesis')
             if not os.path.isdir(nodepath):
                 os.makedirs(nodepath)
@@ -182,12 +186,15 @@ class NodeFactory:
             plugins = ['eosio::http_plugin', 'eosio::chain_plugin', 'eosio::chain_api_plugin',
                        'eosio::history_plugin',
                        'eosio::history_api_plugin', 'eosio::net_plugin', 'eosio::net_api_plugin',
-                       'eosio::producer_plugin']
+                       'eosio::producer_plugin'] + a_plugins
+            if "eosio::mongo_db_plugin" in plugins:
+                flags['mongodb-uri'] = "mongodb://127.0.0.1:27017/EOS"
+                flags['mongodb-wipe'] = ''
             config.append('plugin', plugins)
             config.write(join(nodepath, 'config.ini'))
             copyfile(join(self.parent_dir, 'config/genesis.json'), join(nodepath, "genesis.json"))
             node = Node('genesis', nodepath)
-            node.start(3.0)
+            node.start(3.0, flags)
             self.update_node_state(node)
             self.save()
         except FileNotFoundError as e:
@@ -208,7 +215,7 @@ class NodeFactory:
             config.set('p2p-server-address', '%s:%s' % (str(p2p_address), str(p2p_port)))
             config.set('producer-name', account.name)
             config.set('signature-provider', self.create_sig_provider(account.keypair))
-            plugins = ['eosio::producer_plugin']
+            plugins = ['eosio::producer_plugin', 'eosio::net_plugin']
             config.append('plugin', plugins)
             config.write(join(nodepath, 'config.ini'))
             copyfile(join(self.parent_dir, 'config/genesis.json'), join(nodepath, "genesis.json"))

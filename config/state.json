@@ -1,5 +1,5 @@
 {
-    "host_address": "http://localhost:8888",
-    "src-dir": "",
+    "host_address": "http://127.0.0.1:8888",
+    "src-dir": "/Users/hotmdev4/Desktop/telos",
     "wallet-dir": "wallet"
 }

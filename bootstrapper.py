@@ -47,12 +47,13 @@ class BootStrapper:
 
     def boot_strap_node(self, address):
         self.set_host_address(address)
+        self.account_factory.set_host_address(address)
         #TODO: Make sure full node has eosio root key in wallet
         self.account_factory.create_system_accounts(self.systemAccounts)
         self.set_system_contracts(self.systemContracts)
         self.issue_token(self.token_supply, self.token_issue)
         system_contract = join(join(self.telos_dir, self.contracts), 'eosio.system')
-        run(self.teclos_dir + ' --url %s set contract eosio %s -p eosio' % (self.host_address, system_contract))
+        run(self.teclos_dir + ' --url %s set contract eosio %s -p eosio' % (self.host_address, msystem_contract))
         run(self.teclos_dir + ' --url %s push action eosio setpriv \'[\"eosio.msig\", 1]\' -p eosio@active' % self.host_address)
 
     def create_fund_account(self):

@@ -177,13 +177,16 @@ def spin():
 @click.argument('p2p-address')
 @click.option('--path', default=os.getcwd())
 @click.option('--fund-account', default=False)
-def full(http_port, p2p_port, p2p_address, path, fund_account):
+@click.option('--boot-strap', default=True)
+@click.option('--plugin', multiple=True)
+def full(http_port, p2p_port, p2p_address, path, fund_account, boot_strap, plugin):
     """Start a genesis node"""
     try:
         grow.wallet.unlock()
-        grow.node_factory.start_full(path, p2p_address, http_port, p2p_port)
-        grow.boot_strapper.boot_strap_node('http://127.0.0.1:%s' % http_port)
-        if fund_account:
+        grow.node_factory.start_full(path, p2p_address, http_port, p2p_port, list(plugin))
+        if boot_strap is True:
+            grow.boot_strapper.boot_strap_node('http://127.0.0.1:%s' % http_port)
+        if fund_account is True and boot_strap is True:
             grow.boot_strapper.create_fund_account()
     except KeyError as e:
         print(e)
@@ -214,17 +217,19 @@ def single(producer_name, p2p_address, genesis_json_path, genesis_node_address, 
 @click.option('--no-vote', type=bool, default=False)
 @click.option('--vote-self', type=bool, default=False)
 @click.option('--num-self-voters', type=int, default=15)
-def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port, dist_percentage, no_vote, vote_self, num_self_voters):
+@click.option('--plugin', multiple=True)
+def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port, dist_percentage, no_vote, vote_self, num_self_voters,
+         plugin):
     """Start a private mesh of nodes"""
     # TODO: reserve TLOS tokens for account creation, use 10%
     try:
         max_stake = (dist_percentage / num_nodes) / 100 / 3
         min_stake = max_stake / 2
-        total = (max_stake * 3 * 100 * 21)
+        total = (max_stake * 3 * 100 * num_nodes)
         assert (total <= dist_percentage)
 
         grow.wallet.unlock()
-        grow.node_factory.start_full(path, '0.0.0.0', str(genesis_http_port), str(genesis_p2p_port))
+        grow.node_factory.start_full(path, '0.0.0.0', str(genesis_http_port), str(genesis_p2p_port), list(plugin))
         grow.boot_strapper.boot_strap_node('http://127.0.0.1:%s' % str(genesis_http_port))
         producers = grow.account_factory.create_random_accounts(num_nodes, BootStrapper.token_issue * min_stake,
                                                                 BootStrapper.token_issue * max_stake, 'prodname')
@@ -352,8 +357,10 @@ def create(name, json_only, cpu, net, ram, creator):
 @click.argument('path', type=click.Path(exists=True))
 def snapshot(path):
     """Create all the accounts from snapshot file"""
-    #print('Not currently implemented')
-    grow.account_factory.create_accounts_from_csv(path)
+    # print('Not currently implemented')
+    # grow.account_factory.create_accounts_from_csv(path)
+    grow.account_factory.threaded_snapshot_injection(4, path)
+
 
 @accounts.command('randshot')
 @click.argument('path', type=click.Path())
@@ -412,6 +419,7 @@ def reset_wallet():
 def chain():
     """Short hand chain actions"""
 
+
 @chain.command()
 @click.argument('target')
 @click.option('--transactions-only', type=bool, default=False)
@@ -437,6 +445,7 @@ def getblocks(target, transactions_only, block_key):
     else:
         print(get_output('teclos get block %d' % target))
 
+
 @chain.command()
 @click.argument('path')
 def validate_rotations(path):
@@ -444,8 +453,8 @@ def validate_rotations(path):
     validator.start()
 
 
-#TODO: Setup chain actions module
-#TODO: get list of producers sorted by name
+# TODO: Setup chain actions module
+# TODO: get list of producers sorted by name
 
 if __name__ == '__main__':
     cli()

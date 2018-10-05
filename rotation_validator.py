@@ -55,7 +55,6 @@ class RotationValidator:
         if match:
             return match.group().strip()
 
-
     def get_rotations_object(self):
         conn = client.HTTPConnection(self.connect_string, 8888)
         body = {'scope': 'eosio', 'code': 'eosio', 'table': 'rotations', 'json': True}
