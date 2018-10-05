@@ -53,7 +53,7 @@ class BootStrapper:
         self.set_system_contracts(self.systemContracts)
         self.issue_token(self.token_supply, self.token_issue)
         system_contract = join(join(self.telos_dir, self.contracts), 'eosio.system')
-        run(self.teclos_dir + ' --url %s set contract eosio %s -p eosio' % (self.host_address, msystem_contract))
+        run(self.teclos_dir + ' --url %s set contract eosio %s -p eosio' % (self.host_address, system_contract))
         run(self.teclos_dir + ' --url %s push action eosio setpriv \'[\"eosio.msig\", 1]\' -p eosio@active' % self.host_address)
 
     def create_fund_account(self):
