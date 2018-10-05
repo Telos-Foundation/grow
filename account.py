@@ -86,6 +86,7 @@ class AccountFactory:
     def create_accounts_from_input(self, *args):
         i = 0
         for row in enumerate(args[0]):
+            row = row[1]
             if i == 0:
                 i = i + 1
                 continue
