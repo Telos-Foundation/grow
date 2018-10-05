@@ -78,14 +78,14 @@ class AccountFactory:
             for i in range(0, num_threads):
                 input = reader[curr: size * (i + 1)]
                 curr += size
-                thread = threading.Thread(target=self.create_accounts_from_input, args=input)
+                thread = threading.Thread(target=self.create_accounts_from_input, args=(input,))
                 thread.start()
                 threads.append(thread)
 
 
-    def create_accounts_from_input(self, input):
+    def create_accounts_from_input(self, *args):
         i = 0
-        for row in input:
+        for row in enumerate(args[0]):
             if i == 0:
                 i = i + 1
                 continue
