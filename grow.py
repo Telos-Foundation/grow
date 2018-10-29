@@ -249,8 +249,10 @@ def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port, dist_percentage, 
 @click.argument('path', default=os.getcwd())
 def mesh_add(path):
     grow.wallet.unlock()
-    producers = grow.account_factory.create_random_accounts(1, 1000.0000, 1000.0000, 'prodname')
-    grow.node_factory.start_producers_by_account(producers, path)
+    # producers = grow.account_factory.create_random_accounts(1, 2000.0000, 2000.0000, 'prodname')
+    # grow.node_factory.start_producers_by_account(producers, path)
+    # grow.boot_strapper.vote_producers()
+    grow.node_factory.get_producer_names()
 
 
 @spin.command()

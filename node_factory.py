@@ -269,6 +269,13 @@ class NodeFactory:
             nodes.append(self.get_node_from_state(name))
         return nodes
 
+    def get_producer_names(self):
+        nodes = self.get_all_nodes_from_state()
+        names = []
+        for node in nodes:
+            names.append(node.name)
+        return names
+
     def get_open_port(self):
         port = self.find_free_port()
         while not self.is_port_unclaimed(port):
