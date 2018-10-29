@@ -3,6 +3,7 @@ from utility import *
 from new_wallet import Wallet
 from node_factory import NodeFactory
 from account import AccountFactory
+from account import Account
 from bootstrapper import BootStrapper
 from rotation_validator import RotationValidator
 from feedscanner import FeedScanner
@@ -251,7 +252,10 @@ def mesh_add(path):
     grow.wallet.unlock()
     prod = grow.account_factory.create_random_accounts(1, 2000.0000, 2000.0000, 'prodname')
     grow.node_factory.start_producers_by_account(prod, path)
-    prods = grow.node_factory.get_producer_names()
+    tmp = grow.node_factory.get_producer_names()
+    prods = []
+    for prod in tmp:
+        prods.append(Account(prod, {}))
     grow.boot_strapper.self_vote_producers(prods)
 
 
