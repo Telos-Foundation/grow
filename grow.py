@@ -258,6 +258,7 @@ def mesh_add(path):
     for prod in tmp:
         prods.append(Account(prod, {}))
     grow.boot_strapper.self_vote_producers(prods)
+    grow.node_factory.save()
 
 
 @spin.command()
