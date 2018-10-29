@@ -274,6 +274,7 @@ class NodeFactory:
         names = []
         for node in nodes:
             names.append(node.name)
+        names.remove('genesis')
         return names
 
     def get_open_port(self):
