@@ -55,16 +55,16 @@ class AccountFactory:
         a = Account(account_name, pair)
         return a
 
-    def create_random_snapshot(self, num_accounts, min_stake, max_stake, path_to_csv):
+    def create_random_snapshot(self, num_accounts, min_stake, max_stake, path_to_csv, basename='acctname'):
         try:
             with open(path_to_csv, 'w', newline='') as csvfile:
-                fieldnames = [ 'account_name', 'public_key', 'private_key', 'amount' ]
+                fieldnames = ['account_name', 'public_key', 'private_key', 'amount']
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writeheader()
 
-                for account in self.create_random_generator(num_accounts, min_stake, max_stake):
-
+                for account in self.create_random_generator(num_accounts, min_stake, max_stake, basename):
                     writer.writerow(account.toDict())
+
         except Exception as e:
             raise e
 

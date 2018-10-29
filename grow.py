@@ -245,6 +245,13 @@ def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port, dist_percentage, 
     finally:
         grow.save()
 
+@spin.command()
+@click.argument('path', default=os.getcwd())
+def mesh_add(path):
+    grow.wallet.unlock()
+    producers = grow.account_factory.create_random_accounts(1, 1000.0000, 1000.0000, 'prodname')
+    grow.node_factory.start_producers_by_account(producers, path)
+
 
 @spin.command()
 @click.argument('name')
@@ -367,9 +374,10 @@ def snapshot(path):
 @click.option('--num-accounts', type=int, default=100)
 @click.option('--min-stake', type=int, default=10)
 @click.option('--max-stake', type=int, default=100)
-def create_random_snapshot(path, num_accounts, min_stake, max_stake):
+@click.option('--base-name', type=str, default='acctname')
+def create_random_snapshot(path, num_accounts, min_stake, max_stake, base_name):
     """Create a snapshot of random accounts"""
-    grow.account_factory.create_random_snapshot(num_accounts, min_stake, max_stake, path)
+    grow.account_factory.create_random_snapshot(num_accounts, min_stake, max_stake, path, base_name)
 
 
 @cli.group()

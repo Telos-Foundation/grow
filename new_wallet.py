@@ -4,7 +4,7 @@ import psutil
 import logging
 from simple_rest_client.api import API
 from simple_rest_client.resource import Resource
-from simple_rest_client.exceptions import ServerError
+from simple_rest_client.exceptions import ServerError, ClientConnectionError
 from shutil import rmtree
 from time import sleep
 from utility import join
@@ -39,6 +39,7 @@ class WalletResource(Resource):
         'create_key': {'method': 'POST', 'url': 'create_key'}
     }
 
+
 class Wallet:
 
     def __init__(self, wallet_state, keosd_dir, unlockTimeout=120):
@@ -59,9 +60,15 @@ class Wallet:
         )
         self.api.add_resource(resource_name='wallet', resource_class=WalletResource)
         self.pid = -1
-        if not self.is_running():
-            print('Creating new instance of tkeosd')
+
+        try:
+            self.list_wallets()
+        except:
             self.start_wallet()
+
+        # if not self.is_running():
+        #     print('Creating new instance of tkeosd')
+        #     self.start_wallet()
 
         if not self.wallet_exists('default'):
             print('Default wallet not found, creating new default wallet')
@@ -69,8 +76,10 @@ class Wallet:
 
     def is_running(self):
         try:
+            print('attempting to see if im running')
             p = psutil.Process(self.get_pid())
             if p.is_running():
+                print('its running')
                 return True
             return False
         except psutil.ZombieProcess:
