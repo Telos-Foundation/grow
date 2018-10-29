@@ -251,7 +251,6 @@ def mesh_add(path):
     grow.wallet.unlock()
     prod = grow.account_factory.create_random_accounts(1, 2000.0000, 2000.0000, 'prodname')
     grow.node_factory.start_producers_by_account(prod, path)
-    grow.boot_strapper.vote_producers()
     prods = grow.node_factory.get_producer_names()
     grow.boot_strapper.self_vote_producers(prods)
 
