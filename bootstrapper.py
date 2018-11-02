@@ -19,6 +19,8 @@ class BootStrapper:
       "eosio.stake",
       "eosio.token",
       "eosio.vpay"
+      "eosio.amend",
+      "eosio.trail"
     ]
 
     systemContracts = [
