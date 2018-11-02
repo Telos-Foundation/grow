@@ -18,7 +18,7 @@ class BootStrapper:
       "eosio.saving",
       "eosio.stake",
       "eosio.token",
-      "eosio.vpay"
+      "eosio.vpay",
       "eosio.amend",
       "eosio.trail"
     ]
