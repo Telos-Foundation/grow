@@ -82,7 +82,6 @@ class AccountFactory:
                 thread.start()
                 threads.append(thread)
 
-
     def create_accounts_from_input(self, *args):
         i = 0
         for row in enumerate(args[0]):
@@ -171,4 +170,3 @@ class AccountFactory:
             BootStrapper.transfer(self.host_address, 'eosio', a.name, toTransfer, "Initial TLOS Liquid")
             a.amount += toTransfer
             yield a
-

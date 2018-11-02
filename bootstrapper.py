@@ -55,6 +55,10 @@ class BootStrapper:
         system_contract = join(join(self.telos_dir, self.contracts), 'eosio.system')
         run(self.teclos_dir + ' --url %s set contract eosio %s -p eosio' % (self.host_address, system_contract))
         run(self.teclos_dir + ' --url %s push action eosio setpriv \'[\"eosio.msig\", 1]\' -p eosio@active' % self.host_address)
+        for i in range(97, 123):
+            account = self.account_factory.get_acc_obj('testaccount' + chr(i), True)
+            self.account_factory.post_sys_create(account, 50.0000, 50.0000, 100.0000)
+            BootStrapper.transfer(self.host_address, 'eosio', account.name, Asset(300.0000), 'initial transfer')
 
     def create_fund_account(self):
         a = self.account_factory.get_acc_obj('telosfundacc')
@@ -99,7 +103,6 @@ class BootStrapper:
                 cmd = self.teclos_dir + ' --url %s system voteproducer approve ' + a.name + ' ' + a.name
                 run_retry(cmd % self.host_address)
                 i = i + 1
-
 
     def update_auth(self, account, permission, parent, controller):
         run(self.teclos_dir + ' --url' + self.host_address + ' push action eosio updateauth' + jsonArg({
