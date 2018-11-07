@@ -31,17 +31,28 @@ class BootStrapper:
         {
           "owner": "eosio.msig",
           "name": "eosio.msig"
-        }
+        }#,
+        # {
+        #     "owner": "eosio.trail",
+        #     "name": "eosio.trail"
+        # },
+        # {
+        #     "owner": "eosio.amend",
+        #     "name": "eosio.amend"
+        # },
+        # {
+        #     "owner": "eosio.saving",
+        #     "name": "workerproposal"
+        # }
     ]
 
     token_supply = 10000000000
     token_issue = 190473249
 
-    def __init__(self, telos, teclos, host_address, account_factory):
-        self.telos_dir = telos
+    def __init__(self, contracts, teclos, host_address, account_factory):
+        self.contracts_dir = join(os.path.abspath(contracts), 'build/')
         self.teclos_dir = teclos
         self.host_address = host_address
-        self.contracts = 'build/contracts'
         self.account_factory = account_factory
 
     def set_host_address(self, address):
@@ -54,7 +65,7 @@ class BootStrapper:
         self.account_factory.create_system_accounts(self.systemAccounts)
         self.set_system_contracts(self.systemContracts)
         self.issue_token(self.token_supply, self.token_issue)
-        system_contract = join(join(self.telos_dir, self.contracts), 'eosio.system')
+        system_contract = join(self.contracts_dir, 'eosio.system')
         run(self.teclos_dir + ' --url %s set contract eosio %s -p eosio' % (self.host_address, system_contract))
         run(self.teclos_dir + ' --url %s push action eosio setpriv \'[\"eosio.msig\", 1]\' -p eosio@active' % self.host_address)
         for i in range(97, 123):
@@ -73,13 +84,12 @@ class BootStrapper:
         try:
             for contract in contract_names:
                 name = contract['name']
-                path = join(os.path.abspath(self.telos_dir), join(self.contracts, name))
+                path = join(self.contracts_dir, name)
                 self.set_contract(contract['owner'], path)
         except IOError as e:
             print(e)
 
     def set_contract(self, account_name, path, p=""):
-        print(self.host_address)
         cmd = self.teclos_dir + ' --url %s set contract %s %s'
         if p != "":
             cmd += ' -p %s' % p

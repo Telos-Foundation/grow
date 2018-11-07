@@ -10,6 +10,7 @@ from feedscanner import FeedScanner
 from sys import exit
 import click
 import json
+import re
 
 
 class Grow:
@@ -19,7 +20,6 @@ class Grow:
         self.jsonConfig = json.loads(file_get_contents(join(self.parent_dir, "config/state.json")))
 
         self.start_cwd = os.getcwd()
-        self.contracts_dir = "build/contracts"
         self.wallet_dir = join(self.parent_dir, 'wallet')
         self.host_address = self.jsonConfig['host_address'] if 'host_address' in self.jsonConfig and self.jsonConfig[
             'host_address'] == "" else "http://127.0.0.1:8888"
@@ -28,27 +28,44 @@ class Grow:
         self.telos_dir = self.start_cwd
         if 'src-dir' in self.jsonConfig and self.jsonConfig['src-dir'] != '':
             self.telos_dir = os.path.abspath(self.jsonConfig['src-dir'])
+
+        self.contracts_dir = ''
+        if 'contract-path' in self.jsonConfig and self.jsonConfig['contract-path'] != '':
+            self.contracts_dir = self.jsonConfig['contract-path']
+
         self.keosd_dir = join(self.telos_dir, "build/programs/tkeosd/tkeosd")
         self.teclos_dir = join(self.telos_dir, "build/programs/teclos/teclos")
         self.nodeos_dir = join(self.telos_dir, "build/programs/nodeos/nodeos")
         self.initializer = Initializer(self.telos_dir, self.start_cwd, self)
 
     def setup(self):
+        output = get_output('eosio-cpp --version')
+
+        if not re.match('eosio-cpp version (!?[0-9].[0-9](.[0-9])?)', output):
+            print('Grow now requires that eosio.cdt be install')
+            print('Please install the cdt and try again')
+            exit(2)
+
         if not self.is_source_built():
             print(self.telos_dir)
             print('Telos source either doesn\'t exist, or isn\'t initialized.')
             exit(2)
 
+        if not os.path.exists(self.contracts_dir):
+            print('eosio.contracts source either doesn\'t exist, or isn\'t initialized')
+            exit(2)
+
         self.wallet = Wallet(self.wallet_dir, self.keosd_dir)
         self.node_factory = NodeFactory(self.start_cwd, self.parent_dir, self.nodeos_dir, self.wallet)
         self.account_factory = AccountFactory(self.wallet, self.teclos_dir)
-        self.boot_strapper = BootStrapper(self.telos_dir, self.teclos_dir, self.host_address, self.account_factory)
+        self.boot_strapper = BootStrapper(self.contracts_dir, self.teclos_dir, self.host_address, self.account_factory)
 
     def get_source_path(self):
         return self.telos_dir
 
-    def set_source_path(self, path):
-        self.jsonConfig['src-dir'] = os.path.abspath(path)
+    def set_source_path(self, src_path, contract_path):
+        self.jsonConfig['contract-path'] = os.path.abspath(contract_path)
+        self.jsonConfig['src-dir'] = os.path.abspath(src_path)
         self.save()
 
     def source_exists(self):
@@ -153,11 +170,14 @@ def update():
 
 
 @init.command('setsource')
-@click.argument('path', type=click.Path(exists=True))
-def set_src(path):
+@click.argument('telos-src-path', type=click.Path(exists=True))
+@click.argument('contract-src-path', type=click.Path(exists=True))
+def set_src(telos_src_path, contract_src_path):
     """Set grows telos source to an existing directory"""
-    grow.set_source_path(path)
-    print('Telos source has been set to %s' % path)
+
+    grow.set_source_path(telos_src_path, contract_src_path)
+    print('Telos source has been set to %s and the eosio.contracts source was set to %s' % (
+    telos_src_path, contract_src_path))
 
 
 @init.command('getsource')
@@ -245,6 +265,7 @@ def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port, dist_percentage, 
         print(e)
     finally:
         grow.save()
+
 
 @spin.command()
 @click.argument('path', default=os.getcwd())
