@@ -25,7 +25,7 @@ class Wallet:
 
     def __init__(self, wallet_state, teclos_dir, telos_dir, keosd_dir, unlockTimeout=120, forceRestart = False):
         self.wallet_state = wallet_state
-        self.wallet_dir = join(os.path.expanduser('~'), 'telos-wallet')
+        self.wallet_dir = join(os.path.expanduser('~'), 'eosio-wallet')
         self.teclos_dir = teclos_dir
         self.telos_dir = telos_dir
         self.keosd_dir = keosd_dir

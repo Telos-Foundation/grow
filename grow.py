@@ -63,6 +63,9 @@ class Grow:
     def get_source_path(self):
         return self.telos_dir
 
+    def get_contracts_path(self):
+        return self.contracts_dir
+
     def set_source_path(self, src_path, contract_path):
         self.jsonConfig['contract-path'] = os.path.abspath(contract_path)
         self.jsonConfig['src-dir'] = os.path.abspath(src_path)
@@ -184,6 +187,7 @@ def set_src(telos_src_path, contract_src_path):
 def print_source():
     """Print the current Telos source path"""
     print(grow.get_source_path())
+    print(grow.get_contracts_path())
 
 
 @cli.group()
