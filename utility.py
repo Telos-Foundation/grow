@@ -7,7 +7,7 @@ import random
 
 
 def tail(path):
-    f = subprocess.Popen(['tail', '-F', path], \
+    f = subprocess.Popen(['tail', '-F', path],
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     while True:
         line = f.stdout.readline()
@@ -15,7 +15,7 @@ def tail(path):
 
 
 def tail_iterator(path):
-    f = subprocess.Popen(['tail', '-F', path], \
+    f = subprocess.Popen(['tail', '-F', path],
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     while True:
         line = f.stdout.readline()
@@ -54,6 +54,7 @@ def run(args, isShell=True, show=True):
         print('exiting because of error')
         sys.exit(1)
 
+
 def run_retry(args, isShell=True, num=1):
     print(args)
     o = subprocess.call(args, shell=isShell)
@@ -76,6 +77,13 @@ def get_output(args):
     print(args)
     proc = subprocess.Popen(args, shell=True, stdout=subprocess.PIPE)
     return proc.communicate()[0].decode('utf-8')
+
+
+def did_run(args):
+    print(args)
+    p = subprocess.Popen(args.split(' '), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p.communicate()
+    return p.returncode == 0
 
 
 def start_background_proc(args, file, path='./nodeos.pid'):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from utility import *
-from new_wallet import Wallet
+from wallet import Wallet
 from node_factory import NodeFactory
 from account import AccountFactory
 from account import Account
@@ -33,7 +33,7 @@ class Grow:
         if 'contract-path' in self.jsonConfig and self.jsonConfig['contract-path'] != '':
             self.contracts_dir = self.jsonConfig['contract-path']
 
-        self.keosd_dir = join(self.telos_dir, "build/programs/tkeosd/tkeosd")
+        self.keosd_dir = join(self.telos_dir, "build/programs/keosd/keosd")
         self.teclos_dir = join(self.telos_dir, "build/programs/teclos/teclos")
         self.nodeos_dir = join(self.telos_dir, "build/programs/nodeos/nodeos")
         self.initializer = Initializer(self.telos_dir, self.start_cwd, self)
@@ -55,7 +55,7 @@ class Grow:
             print('eosio.contracts source either doesn\'t exist, or isn\'t initialized')
             exit(2)
 
-        self.wallet = Wallet(self.wallet_dir, self.keosd_dir)
+        self.wallet = Wallet(self.wallet_dir, self.teclos_dir, self.telos_dir, self.keosd_dir, 10000)
         self.node_factory = NodeFactory(self.start_cwd, self.parent_dir, self.nodeos_dir, self.wallet)
         self.account_factory = AccountFactory(self.wallet, self.teclos_dir)
         self.boot_strapper = BootStrapper(self.contracts_dir, self.teclos_dir, self.host_address, self.account_factory)

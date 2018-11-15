@@ -314,10 +314,8 @@ class NodeFactory:
     def get_port_from_range(self, floor):
         print('Getting port from range')
         for port in range(floor, 20000):
-            print(port)
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             result = sock.connect_ex(('localhost', port))
-            print(result)
             if result == 0:
                 print("Port {}: 	 Open".format(port))
                 sock.close()

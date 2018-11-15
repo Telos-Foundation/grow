@@ -120,7 +120,7 @@ class AccountFactory:
         accounts = []
         self.wallet.unlock()
         for name in account_names:
-            a = self.get_acc_obj(name)
+            a = self.get_acc_obj(name, True)
             self.pre_sys_create(a)
             accounts.append(a)
         return accounts

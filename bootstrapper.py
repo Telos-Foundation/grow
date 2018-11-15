@@ -88,7 +88,7 @@ class BootStrapper:
             for contract in contract_names:
                 name = contract['name']
                 path = join(self.contracts_dir, name)
-                self.set_contract(contract['owner'], path)
+                self.set_contract(contract['owner'], path, contract['owner'])
         except IOError as e:
             print(e)
 
