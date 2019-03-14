@@ -356,6 +356,7 @@ def create_random_snapshot(path, num_accounts, min_stake, max_stake, base_name):
 def wallet():
     """Lock, unlock, and create keys"""
     grow.setup()
+    grow.wallet.unlock()
 
 
 @wallet.command()
