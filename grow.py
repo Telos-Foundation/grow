@@ -76,6 +76,9 @@ class Grow:
         output = get_output('cleos version client')
         return re.match('Build version: ', output)
 
+    def set_source_path(self, src_path, contract_path):
+        self.jsonConfig['contract-path'] = os.path.abspath(contract_path)
+        self.save()
 
     def get_contracts_path(self):
         return self.contracts_dir
@@ -113,10 +116,10 @@ def init(tag):
 
 @init.command('setsource')
 @click.argument('contract-src-path', type=click.Path(exists=True))
-def set_src(telos_src_path, contract_src_path):
+def set_src(contract_src_path):
     """Set grows telos source to an existing directory"""
 
-    grow.set_source_path(telos_src_path, contract_src_path)
+    grow.set_source_path(contract_src_path)
     print('eosio.contracts source was set to path %s' % (contract_src_path))
 
 
