@@ -76,7 +76,7 @@ class Grow:
         output = get_output('cleos version client')
         return re.match('Build version: ', output)
 
-    def set_source_path(self, src_path, contract_path):
+    def set_source_path(self, contract_path):
         self.jsonConfig['contract-path'] = os.path.abspath(contract_path)
         self.save()
 
