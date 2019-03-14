@@ -74,11 +74,13 @@ def run_continue(args, isShell=True):
 
 
 def get_output(args):
+    print(args)
     proc = subprocess.Popen(args, shell=True, stdout=subprocess.PIPE)
     return proc.communicate()[0].decode('utf-8')
 
 
 def did_run(args):
+    print(args)
     p = subprocess.Popen(args.split(' '), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     p.communicate()
     return p.returncode == 0
