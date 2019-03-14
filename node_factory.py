@@ -45,7 +45,7 @@ class Node:
         print(flags)
         if not os.path.isdir(self.path):
             os.makedirs(self.path)
-        cmd = NodeFactory.nodeos_dir + ' --config-dir %s --genesis-json %s --delete-all-blocks'
+        cmd = NodeFactory.nodeos + ' --config-dir %s --genesis-json %s --delete-all-blocks'
         for key in flags:
             cmd += " --{} {}".format(key, flags[key])
         genesis_dir = join(self.path, 'genesis.json')
@@ -58,7 +58,7 @@ class Node:
         if self.is_running():
             self.stop()
         if os.path.isdir(self.path):
-            cmd = NodeFactory.nodeos_dir + ' --config-dir %s --hard-replay-blockchain'
+            cmd = NodeFactory.nodeos + ' --config-dir %s --hard-replay-blockchain'
             start_background_proc(cmd % self.path, log_file(join(self.path, 'stderr.txt')), join(self.path, 'node.pid'))
             sleep(delay_time)
         else:
@@ -114,11 +114,11 @@ class Node:
 
 
 class NodeFactory:
-    nodeos_dir = ''
+    nodeos = ''
 
     def __init__(self, working, parent, nodeos, wallet):
         self.folder_scheme = 'tn-'
-        NodeFactory.nodeos_dir = nodeos
+        NodeFactory.nodeos = nodeos
         self.parent_dir = parent
         self.working_dir = working
         self.config_dir = join(parent, 'config/nodes.json')
@@ -151,8 +151,7 @@ class NodeFactory:
             pair = self.wallet.create_import()
             config.set('signature-provider', self.create_sig_provider(pair))
             plugins = ['eosio::http_plugin', 'eosio::chain_plugin', 'eosio::chain_api_plugin',
-                       'eosio::history_plugin',
-                       'eosio::history_api_plugin', 'eosio::net_plugin', 'eosio::net_api_plugin',
+                       'eosio::net_api_plugin',
                        'eosio::producer_plugin']
             config.append('plugin', plugins)
             config.set('p2p-peer-address', genesis_node_address)
@@ -184,8 +183,6 @@ class NodeFactory:
             self.edit_new_genesis(pair.public)
             config.set('signature-provider', self.create_sig_provider(pair))
             plugins = ['eosio::http_plugin', 'eosio::chain_plugin', 'eosio::chain_api_plugin',
-                       'eosio::history_plugin',
-                       'eosio::history_api_plugin', 'eosio::net_plugin', 'eosio::net_api_plugin',
                        'eosio::producer_plugin'] + a_plugins
             if "eosio::mongo_db_plugin" in plugins:
                 flags['mongodb-uri'] = "mongodb://127.0.0.1:27017/EOS"

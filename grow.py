@@ -24,59 +24,61 @@ class Grow:
         self.host_address = self.jsonConfig['host_address'] if 'host_address' in self.jsonConfig and self.jsonConfig[
             'host_address'] == "" else "http://127.0.0.1:8888"
 
-        self.git_tag = ''
-        self.telos_dir = self.start_cwd
-        if 'src-dir' in self.jsonConfig and self.jsonConfig['src-dir'] != '':
-            self.telos_dir = os.path.abspath(self.jsonConfig['src-dir'])
-
         self.contracts_dir = ''
         if 'contract-path' in self.jsonConfig and self.jsonConfig['contract-path'] != '':
             self.contracts_dir = self.jsonConfig['contract-path']
 
-        self.keosd_dir = join(self.telos_dir, "build/programs/keosd/keosd")
-        self.teclos_dir = join(self.telos_dir, "build/programs/teclos/teclos")
-        self.nodeos_dir = join(self.telos_dir, "build/programs/nodeos/nodeos")
-        self.initializer = Initializer(self.telos_dir, self.start_cwd, self)
+        self.keosd = "keosd"
+        self.cleos = "cleos"
+        self.nodeos = "nodeos"
 
     def setup(self):
-        output = get_output('eosio-cpp --version')
 
-        if not re.match('eosio-cpp version (!?[0-9].[0-9](.[0-9])?)', output):
-            print('Grow now requires that eosio.cdt be install')
+        if not self.isCdt():
+            print('Grow requires that eosio.cdt be install')
             print('Please install the cdt and try again')
             exit(2)
 
-        if not self.is_source_built():
-            print(self.telos_dir)
-            print('Telos source either doesn\'t exist, or isn\'t initialized.')
+        if not self.isNodeos():
+            print('Grow requires nodeos to be installed and in the path variable')
+            exit(2)
+
+        if not self.isCleos():
+            print('Grow requires cleos to be installed and in the path variable')
+            exit(2)
+
+        if not self.isKeosd():
+            print('Grow requires keosd to be installed and in the path variable')
             exit(2)
 
         if not os.path.exists(self.contracts_dir):
             print('eosio.contracts source either doesn\'t exist, or isn\'t initialized')
             exit(2)
 
-        self.wallet = Wallet(self.wallet_dir, self.teclos_dir, self.telos_dir, self.keosd_dir, 10000)
-        self.node_factory = NodeFactory(self.start_cwd, self.parent_dir, self.nodeos_dir, self.wallet)
-        self.account_factory = AccountFactory(self.wallet, self.teclos_dir)
-        self.boot_strapper = BootStrapper(self.contracts_dir, self.teclos_dir, self.host_address, self.account_factory)
+        self.wallet = Wallet(self.wallet_dir, self.cleos, self.keosd, 10000)
+        self.node_factory = NodeFactory(self.start_cwd, self.parent_dir, self.nodeos, self.wallet)
+        self.account_factory = AccountFactory(self.wallet, self.cleos)
+        self.boot_strapper = BootStrapper(self.contracts_dir, self.cleos, self.host_address, self.account_factory)
 
-    def get_source_path(self):
-        return self.telos_dir
+    def isCdt(self):
+        output = get_output('eosio-cpp --version')
+        return re.match('eosio-cpp version (!?[0-9].[0-9](.[0-9])?)', output)
+
+    def isNodeos(self):
+        output = get_output('nodeos --version')
+        return re.match('v(!?[0-9].[0-9](.[0-9])?)', output)
+
+    def isKeosd(self):
+        output = get_output('keosd --version')
+        return re.match('v(!?[0-9].[0-9](.[0-9])?)', output)
+
+    def isCleos(self):
+        output = get_output('cleos version client')
+        return re.match('Build version: ', output)
+
 
     def get_contracts_path(self):
         return self.contracts_dir
-
-    def set_source_path(self, src_path, contract_path):
-        self.jsonConfig['contract-path'] = os.path.abspath(contract_path)
-        self.jsonConfig['src-dir'] = os.path.abspath(src_path)
-        self.save()
-
-    def source_exists(self):
-        return os.path.isdir(self.telos_dir)
-
-    def is_source_built(self):
-        print("path exists: %s %s" % (str(os.path.isdir(join(self.telos_dir, 'build'))), join(self.telos_dir, 'build')))
-        return self.source_exists() and os.path.isdir(join(self.telos_dir, 'build'))
 
     def set_host_address(self, address):
         self.host_address = address
@@ -92,56 +94,6 @@ class Grow:
         j = json.loads(get_output('teclos get info'))
         return j['chain-id']
 
-
-class Initializer:
-
-    def __init__(self, telos, cwd, grow):
-        self.git_tag = 'stage2.0'
-        self.telos_dir = telos
-        self.telos_repo_url = "https://github.com/Telos-Foundation/telos.git"
-        self.start_cwd = cwd
-        self.grow = grow
-
-    def set_tag(self, tag):
-        self.git_tag = tag
-
-    def reset_cwd(self):
-        os.chdir(self.start_cwd)
-
-    def pull(self):
-        try:
-            os.chdir(self.start_cwd)
-            run(['git clone %s -b %s --recursive' % (self.telos_repo_url, self.git_tag)])
-            path = join(self.start_cwd, 'telos')
-            self.telos_dir = path
-            grow.set_source_path(path)
-            self.grow.save()
-            self.build_source()
-        except OSError as e:
-            print(e)
-
-    def build_source(self):
-        try:
-            os.chdir(self.telos_dir)
-            run('sudo ./telos_build.sh')
-            run('sudo ./telos_install.sh')
-            self.reset_cwd()
-        except IOError as e:
-            print(e)
-
-    def update(self):
-        try:
-            os.chdir(self.telos_dir)
-            run('git checkout .')
-            run('git pull origin master')
-            run('git checkout %s' % (self.git_tag))
-            run('git submodule update --init --recursive')
-            self.reset_cwd()
-            self.build_source()
-        except IOError as e:
-            print(e)
-
-
 grow = Grow()
 
 
@@ -155,38 +107,22 @@ def cli():
 
 
 @cli.group()
-@click.option('--tag', default='stage2.0')
+@click.option('--tag')
 def init(tag):
     """Initialize Grow with telos source, or update an existing source"""
-    grow.initializer.set_tag(tag)
-
-
-@init.command()
-def pull():
-    """Pull the telos source into the current working directory"""
-    grow.initializer.pull()
-
-
-@init.command()
-def update():
-    grow.initializer.update()
-
 
 @init.command('setsource')
-@click.argument('telos-src-path', type=click.Path(exists=True))
 @click.argument('contract-src-path', type=click.Path(exists=True))
 def set_src(telos_src_path, contract_src_path):
     """Set grows telos source to an existing directory"""
 
     grow.set_source_path(telos_src_path, contract_src_path)
-    print('Telos source has been set to %s and the eosio.contracts source was set to %s' % (
-    telos_src_path, contract_src_path))
+    print('eosio.contracts source was set to path %s' % (contract_src_path))
 
 
 @init.command('getsource')
 def print_source():
     """Print the current Telos source path"""
-    print(grow.get_source_path())
     print(grow.get_contracts_path())
 
 

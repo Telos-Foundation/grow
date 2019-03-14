@@ -23,11 +23,10 @@ class KeyPair:
 
 class Wallet:
 
-    def __init__(self, wallet_state, teclos_dir, telos_dir, keosd_dir, unlockTimeout=120, forceRestart = False):
+    def __init__(self, wallet_state, teclos_dir, keosd_dir, unlockTimeout=120, forceRestart = False):
         self.wallet_state = wallet_state
         self.wallet_dir = join(os.path.expanduser('~'), 'eosio-wallet')
         self.teclos_dir = teclos_dir
-        self.telos_dir = telos_dir
         self.keosd_dir = keosd_dir
         self.wallet_address = 'http://127.0.0.1:8999'
         self.teclos_start = '%s --wallet-url %s' % (teclos_dir, self.wallet_address)
@@ -36,6 +35,8 @@ class Wallet:
 
         if not self.open():
             self.create()
+
+        self.unlock()
 
     def exists(self):
         return self.wallet_exists('default')

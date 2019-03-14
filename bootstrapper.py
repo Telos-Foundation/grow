@@ -11,47 +11,52 @@ from json import dumps as toJson
 
 class BootStrapper:
     systemAccounts = [
-      "eosio.bpay",
-      "eosio.msig",
-      "eosio.names",
-      "eosio.ram",
-      "eosio.ramfee",
-      "eosio.saving",
-      "eosio.stake",
-      "eosio.token",
-      "eosio.vpay",
-      "eosio.amend",
-      "eosio.trail"
+        "eosio.bpay",
+        "eosio.msig",
+        "eosio.names",
+        "eosio.ram",
+        "eosio.ramfee",
+        "eosio.saving",
+        "eosio.stake",
+        "eosio.token",
+        "eosio.vpay",
+        "eosio.amend",
+        "eosio.trail",
+        "eosio.arb"
     ]
 
     systemContracts = [
         {
-          "owner": "eosio.token",
-          "name": "eosio.token"
+            "owner": "eosio.token",
+            "name": "eosio.token"
         },
         {
-          "owner": "eosio.msig",
-          "name": "eosio.msig"
-        }#,
-        # {
-        #     "owner": "eosio.trail",
-        #     "name": "eosio.trail"
-        # },
-        # {
-        #     "owner": "eosio.amend",
-        #     "name": "eosio.amend"
-        # },
-        # {
-        #     "owner": "eosio.saving",
-        #     "name": "workerproposal"
-        # }
+            "owner": "eosio.msig",
+            "name": "eosio.msig"
+        },
+        {
+            "owner": "eosio.trail",
+            "name": "eosio.trail"
+        },
+        {
+            "owner": "eosio.amend",
+            "name": "eosio.amend"
+        },
+        {
+            "owner": "eosio.saving",
+            "name": "eosio.saving"
+        },
+        {
+            "owner": "eosio.arb",
+            "name": "eosio.arbitration"
+        }
     ]
 
     token_supply = 10000000000
     token_issue = 190473249
 
     def __init__(self, contracts, teclos, host_address, account_factory):
-        self.contracts_dir = join(os.path.abspath(contracts), 'build/')
+        self.contracts_dir = join(os.path.abspath(contracts), 'build/contracts')
         self.teclos_dir = teclos
         self.host_address = host_address
         self.account_factory = account_factory
@@ -62,7 +67,7 @@ class BootStrapper:
     def boot_strap_node(self, address):
         self.set_host_address(address)
         self.account_factory.set_host_address(address)
-        #TODO: Make sure full node has eosio root key in wallet
+        # TODO: Make sure full node has eosio root key in wallet
         self.account_factory.create_system_accounts(self.systemAccounts)
         self.set_system_contracts(self.systemContracts)
         self.issue_token(self.token_supply, self.token_issue)
@@ -70,7 +75,8 @@ class BootStrapper:
         run(self.teclos_dir + ' --url %s set contract eosio %s -p eosio' % (self.host_address, system_contract))
         args = toJson([0, "4,TLOS"])
         run(self.teclos_dir + ' --url %s push action eosio init \'%s\' -p eosio@active' % (self.host_address, args))
-        run(self.teclos_dir + ' --url %s push action eosio setpriv \'[\"eosio.msig\", 1]\' -p eosio@active' % self.host_address)
+        run(
+            self.teclos_dir + ' --url %s push action eosio setpriv \'[\"eosio.msig\", 1]\' -p eosio@active' % self.host_address)
         for i in range(97, 123):
             account = self.account_factory.get_acc_obj('testaccount' + chr(i), True)
             self.account_factory.post_sys_create(account, 50.0000, 50.0000, 100.0000)
@@ -81,7 +87,7 @@ class BootStrapper:
         self.account_factory.post_sys_create(a, (self.token_issue * 0.15) / 2,
                                              (self.token_issue * 0.15) / 2, 1000.0000)
         BootStrapper.transfer(self.host_address, 'eosio', a.name, Asset(1000.0000),
-                 "Sending 15 percent stake and enough money to create new accounts")
+                              "Sending 15 percent stake and enough money to create new accounts")
 
     def set_system_contracts(self, contract_names):
         try:
@@ -155,9 +161,9 @@ class BootStrapper:
 
     def reg_producer(self, a):
         run(self.teclos_dir + " --url %s system regproducer %s %s %s" % (
-        self.host_address, a.name, a.keypair.public, "http://" + a.name + ".com/" + a.keypair.public))
+            self.host_address, a.name, a.keypair.public, "http://" + a.name + ".com/" + a.keypair.public))
 
     @staticmethod
     def transfer(host_address, sender, receipient, amount, memo=""):
-        cmd = 'teclos --url %s transfer %s %s \"%s\" \"%s\"'
+        cmd = 'cleos --url %s transfer %s %s \"%s\" \"%s\"'
         run_retry(cmd % (host_address, sender, receipient, amount, memo))
