@@ -23,20 +23,18 @@ class KeyPair:
 
 class Wallet:
 
-    def __init__(self, wallet_state, teclos_dir, keosd_dir, unlockTimeout=120, forceRestart = False):
+    def __init__(self, wallet_state, cleos, keosd, unlockTimeout=120, forceRestart = False):
         self.wallet_state = wallet_state
         self.wallet_dir = join(os.path.expanduser('~'), 'eosio-wallet')
-        self.teclos_dir = teclos_dir
-        self.keosd_dir = keosd_dir
+        self.cleos = cleos
+        self.keosd = keosd
         self.wallet_address = 'http://127.0.0.1:8999'
-        self.teclos_start = '%s --wallet-url %s' % (teclos_dir, self.wallet_address)
+        self.teclos_start = '%s --wallet-url %s' % (cleos, self.wallet_address)
         self.unlockTimeout = unlockTimeout
         self.pid = -1
 
         if not self.open():
             self.create()
-
-        self.unlock()
 
     def exists(self):
         return self.wallet_exists('default')
@@ -51,21 +49,21 @@ class Wallet:
     def create(self):
         if not os.path.exists(self.wallet_state):
             os.makedirs(self.wallet_state)
-        run(self.teclos_dir + ' wallet create --file ' + join(self.wallet_state, 'wallet_pw.txt'))
+        run(self.cleos + ' wallet create --file ' + join(self.wallet_state, 'wallet_pw.txt'))
 
     def open(self):
-        return did_run('{} wallet open'.format(self.teclos_dir))
+        return did_run('{} wallet open'.format(self.cleos))
 
     def unlock(self):
-        did_run(self.teclos_dir + ' wallet unlock --password ' + self.get_pw())
+        did_run(self.cleos + ' wallet unlock --password ' + self.get_pw())
 
     def lock(self):
-        did_run(self.teclos_dir + ' wallet lock')
+        did_run(self.cleos + ' wallet lock')
 
     def get_keys(self):
         try:
             self.unlock()
-            o = get_output(self.teclos_dir + ' wallet private_keys --password %s' % self.get_pw())
+            o = get_output(self.cleos + ' wallet private_keys --password %s' % self.get_pw())
             j = json.loads(o)
             output = []
             for keypair in j:
@@ -79,7 +77,7 @@ class Wallet:
 
     def contains_key(self, key):
         self.unlock()
-        o = get_output(self.teclos_dir + ' wallet private_keys --password %s' % self.get_pw())
+        o = get_output(self.cleos + ' wallet private_keys --password %s' % self.get_pw())
         j = json.loads(o)
         for keypair in j:
             if key == keypair[0] or key == keypair[1]:
@@ -93,7 +91,7 @@ class Wallet:
 
     def create_key(self):
         try:
-            o = get_output(self.teclos_dir + ' create key --to-console').split("\n")
+            o = get_output(self.cleos + ' create key --to-console').split("\n")
             private = o[0][o[0].index(':') + 2:len(o[0])]
             public = o[1][o[1].index(':') + 2:len(o[1])]
             return KeyPair(public, private)
@@ -101,7 +99,7 @@ class Wallet:
             print(e)
 
     def import_key(self, private_key):
-        run(self.teclos_dir + ' wallet import --private-key %s' % (private_key))
+        run(self.cleos + ' wallet import --private-key %s' % (private_key))
 
     def parse_pw(self, o):
         try:
