@@ -304,6 +304,7 @@ def reset():
 def accounts(url):
     """Create accounts on a test net"""
     grow.setup()
+    grow.wallet.unlock()
     grow.account_factory.set_host_address(url)
     grow.set_host_address(url)
     grow.save()
