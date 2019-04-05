@@ -58,7 +58,7 @@ class Grow:
         self.wallet = Wallet(self.wallet_dir, self.cleos, self.keosd, 10000)
         self.node_factory = NodeFactory(self.start_cwd, self.parent_dir, self.nodeos, self.wallet)
         self.account_factory = AccountFactory(self.wallet, self.cleos)
-        self.boot_strapper = BootStrapper(self.contracts_dir, self.cleos, self.host_address, self.account_factory)
+        self.boot_strapper = BootStrapper(self.parent_dir, self.contracts_dir, self.cleos, self.host_address, self.account_factory)
 
     def isCdt(self):
         output = get_output('eosio-cpp --version')
@@ -133,6 +133,7 @@ def print_source():
 def spin():
     """Spin up producer nodes, full nodes, and meshes using nodeos"""
     grow.setup()
+    grow.wallet.unlock()
 
 
 @spin.command()
@@ -146,7 +147,6 @@ def spin():
 def full(http_port, p2p_port, p2p_address, path, fund_account, boot_strap, plugin):
     """Start a genesis node"""
     try:
-        grow.wallet.unlock()
         grow.node_factory.start_full(path, p2p_address, http_port, p2p_port, list(plugin))
         if boot_strap is True:
             grow.boot_strapper.boot_strap_node('http://127.0.0.1:%s' % http_port)
@@ -192,7 +192,6 @@ def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port, dist_percentage, 
         total = (max_stake * 3 * 100 * num_nodes)
         assert (total <= dist_percentage)
 
-        grow.wallet.unlock()
         grow.node_factory.start_full(path, '0.0.0.0', str(genesis_http_port), str(genesis_p2p_port), list(plugin))
         grow.boot_strapper.boot_strap_node('http://127.0.0.1:%s' % str(genesis_http_port))
         producers = grow.account_factory.create_random_accounts(num_nodes, BootStrapper.token_issue * min_stake,
@@ -213,7 +212,6 @@ def mesh(path, num_nodes, genesis_http_port, genesis_p2p_port, dist_percentage, 
 @spin.command()
 @click.argument('path', default=os.getcwd())
 def mesh_add(path):
-    grow.wallet.unlock()
     prod = grow.account_factory.create_random_accounts(1, 2000.0000, 2000.0000, 'prodname')[0]
     grow.node_factory.start_producers_by_account([prod], path)
     grow.boot_strapper.reg_producers([prod])
@@ -314,6 +312,7 @@ def accounts(url):
 @click.option('--count', default=1)
 def gen(count):
     """Generate Random Accounts on a net"""
+    grow.wallet.unlock()
     grow.account_factory.create_random_accounts(count, 100, 1000)
 
 
@@ -357,7 +356,6 @@ def create_random_snapshot(path, num_accounts, min_stake, max_stake, base_name):
 def wallet():
     """Lock, unlock, and create keys"""
     grow.setup()
-    grow.wallet.unlock()
 
 
 @wallet.command()
@@ -385,6 +383,7 @@ def gen(json_only):
     if json_only:
         print(grow.wallet.create_key())
     else:
+        grow.wallet.unlock()
         print(grow.wallet.create_import())
 
 

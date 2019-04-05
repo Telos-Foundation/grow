@@ -183,7 +183,7 @@ class NodeFactory:
             self.edit_new_genesis(pair.public)
             config.set('signature-provider', self.create_sig_provider(pair))
             plugins = ['eosio::http_plugin', 'eosio::chain_plugin', 'eosio::chain_api_plugin',
-                       'eosio::producer_plugin'] + a_plugins
+                       'eosio::producer_plugin', 'eosio::history_plugin', 'eosio::history_api_plugin'] + a_plugins
             if "eosio::mongo_db_plugin" in plugins:
                 flags['mongodb-uri'] = "mongodb://127.0.0.1:27017/EOS"
                 flags['mongodb-wipe'] = ''

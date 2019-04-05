@@ -3,63 +3,26 @@ from utility import jsonArg
 from utility import run
 from utility import run_retry
 from utility import join
+from utility import file_get_contents
 from random import randint
 from time import sleep
 from asset import Asset
 from json import dumps as toJson
+from json import loads as fromJson
 
 
 class BootStrapper:
-    systemAccounts = [
-        "eosio.bpay",
-        "eosio.msig",
-        "eosio.names",
-        "eosio.ram",
-        "eosio.ramfee",
-        "eosio.saving",
-        "eosio.stake",
-        "eosio.token",
-        "eosio.vpay",
-        "eosio.amend",
-        "eosio.trail",
-        "eosio.arb"
-    ]
-
-    systemContracts = [
-        {
-            "owner": "eosio.token",
-            "name": "eosio.token"
-        },
-        {
-            "owner": "eosio.msig",
-            "name": "eosio.msig"
-        },
-        {
-            "owner": "eosio.trail",
-            "name": "eosio.trail"
-        },
-        {
-            "owner": "eosio.amend",
-            "name": "eosio.amend"
-        },
-        {
-            "owner": "eosio.saving",
-            "name": "eosio.saving"
-        },
-        {
-            "owner": "eosio.arb",
-            "name": "eosio.arbitration"
-        }
-    ]
-
     token_supply = 10000000000
     token_issue = 190473249
 
-    def __init__(self, contracts, teclos, host_address, account_factory):
+    def __init__(self, parent_dir, contracts, teclos, host_address, account_factory):
         self.contracts_dir = join(os.path.abspath(contracts), 'build/contracts')
         self.teclos_dir = teclos
         self.host_address = host_address
         self.account_factory = account_factory
+        accounts = fromJson(file_get_contents(parent_dir + '/config/accounts.json'))
+        self.pre_accounts = accounts['pre-accounts']
+        self.post_accounts = accounts['post-accounts']
 
     def set_host_address(self, address):
         self.host_address = address
@@ -68,19 +31,18 @@ class BootStrapper:
         self.set_host_address(address)
         self.account_factory.set_host_address(address)
         # TODO: Make sure full node has eosio root key in wallet
-        self.account_factory.create_system_accounts(self.systemAccounts)
-        self.set_system_contracts(self.systemContracts)
+        self.account_factory.create_pre_accounts(self.pre_accounts)
+        self.set_system_contracts(self.pre_accounts)
         self.issue_token(self.token_supply, self.token_issue)
         system_contract = join(self.contracts_dir, 'eosio.system')
         run(self.teclos_dir + ' --url %s set contract eosio %s -p eosio' % (self.host_address, system_contract))
         args = toJson([0, "4,TLOS"])
         run(self.teclos_dir + ' --url %s push action eosio init \'%s\' -p eosio@active' % (self.host_address, args))
-        run(
-            self.teclos_dir + ' --url %s push action eosio setpriv \'[\"eosio.msig\", 1]\' -p eosio@active' % self.host_address)
-        for i in range(97, 123):
-            account = self.account_factory.get_acc_obj('testaccount' + chr(i), True)
-            self.account_factory.post_sys_create(account, 50.0000, 50.0000, 100.0000)
-            BootStrapper.transfer(self.host_address, 'eosio', account.name, Asset(300.0000), 'initial transfer')
+        run(self.teclos_dir + ' --url %s push action eosio setpriv \'[\"eosio.msig\", 1]\' -p eosio@active' %
+            self.host_address)
+
+        self.account_factory.create_post_accounts(self.post_accounts)
+
 
     def create_fund_account(self):
         a = self.account_factory.get_acc_obj('telosfundacc')
@@ -92,9 +54,10 @@ class BootStrapper:
     def set_system_contracts(self, contract_names):
         try:
             for contract in contract_names:
-                name = contract['name']
-                path = join(self.contracts_dir, name)
-                self.set_contract(contract['owner'], path, contract['owner'])
+                if 'contract' in contract:
+                    name = contract['contract']
+                    path = join(self.contracts_dir, name)
+                    self.set_contract(contract['name'], path, contract['name'])
         except IOError as e:
             print(e)
 

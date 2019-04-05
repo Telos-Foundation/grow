@@ -56,7 +56,7 @@ def run(args, isShell=True, show=True):
 
 
 def run_retry(args, isShell=True, num=1):
-    print(args)
+    # print(args)
     o = subprocess.call(args, shell=isShell)
     if o and num <= 3:
         print('Failed retrying... ')
@@ -68,26 +68,26 @@ def run_retry(args, isShell=True, num=1):
 
 
 def run_continue(args, isShell=True):
-    print(args)
+    # print(args)
     if subprocess.call(args, shell=isShell):
         print('command failed')
 
 
 def get_output(args):
-    print(args)
+    # print(args)
     proc = subprocess.Popen(args, shell=True, stdout=subprocess.PIPE)
     return proc.communicate()[0].decode('utf-8')
 
 
 def did_run(args):
-    print(args)
+    # print(args)
     p = subprocess.Popen(args.split(' '), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     p.communicate()
     return p.returncode == 0
 
 
 def start_background_proc(args, file, path='./nodeos.pid'):
-    print(args)
+    # print(args)
     args = args.split(' ')
     p = subprocess.Popen(args,
                          stdout=file,

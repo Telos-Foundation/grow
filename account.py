@@ -8,7 +8,7 @@ from random import randint
 from wallet import KeyPair
 from bootstrapper import BootStrapper
 import threading
-
+from attrdict import AttrDict
 
 class Account:
     def __init__(self, name, keypair):
@@ -34,12 +34,10 @@ class AccountFactory:
         self.host_address = address
 
     def pre_sys_create(self, a):
-        #self.wallet.import_key(a.keypair.private)
-        print(self.host_address)
         run(self.teclos + ' --url %s create account eosio %s %s' % (self.host_address, a.name, a.keypair.public))
 
-    def post_sys_create(self, a, net, cpu, ram, creator='eosio'):
-        cmd = self.teclos + ' --url %s system newaccount %s --transfer %s %s --stake-net \"%s\" --stake-cpu \"%s\" --buy-ram \"%s\"'
+    def post_sys_create(self, a, net=1000, cpu=1000, ram=200, creator='eosio'):
+        cmd = self.teclos + ' --url %s system newaccount %s --transfer %s %s --stake-net \"%s\" --stake-cpu \"%s\" --buy-ram-kbytes \"%s\"'
         net = Asset(net)
         cpu = Asset(cpu)
         ram = Asset(ram)
@@ -116,14 +114,22 @@ class AccountFactory:
         except Exception as e:
             print(e)
 
-    def create_system_accounts(self, account_names):
-        accounts = []
-        self.wallet.unlock()
-        for name in account_names:
-            a = self.get_acc_obj(name, True)
+    def create_pre_accounts(self, pre_accounts):
+        for aObj in pre_accounts:
+            a = AttrDict(aObj);
+            if not self.wallet.contains_key(a.keypair.private):
+                self.wallet.import_key(a.keypair.private)
+
             self.pre_sys_create(a)
-            accounts.append(a)
-        return accounts
+
+    def create_post_accounts(self, post_accounts):
+        for aObj in post_accounts:
+            a = AttrDict(aObj)
+            a = Account(a.name, a.keypair)
+            if not self.wallet.contains_key(a.keypair.public):
+                self.wallet.import_key(a.keypair.private)
+            self.post_sys_create(a)
+            # set contract if config exists in object
 
     def create_tip5_wallets_from_snapshot(self, path_to_csv, contract_account, min_tokens, max_tokens):
         try:
