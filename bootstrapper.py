@@ -1,9 +1,13 @@
 import os
+import datetime as dt
+from dateutil.relativedelta import relativedelta
+from dateutil.parser import parse
 from utility import jsonArg
 from utility import run
 from utility import run_retry
 from utility import join
 from utility import file_get_contents
+from utility import get_output
 from random import randint
 from time import sleep
 from asset import Asset
@@ -41,8 +45,38 @@ class BootStrapper:
         run(self.teclos_dir + ' --url %s push action eosio setpriv \'[\"eosio.msig\", 1]\' -p eosio@active' %
             self.host_address)
 
-        self.account_factory.create_post_accounts(self.post_accounts)
+        self.account_factory.create_post_accounts(self.post_accounts, self.setup_post_account)
 
+    def setup_post_account(self, post_account):
+        if('contract' in post_account):
+            self.set_contract(post_account.name, post_account.contract.path, post_account.name)
+            # TODO: create trx and send it
+            self.push_transaction(post_account.contract.init)
+
+        if('actions' in post_account):
+            self.push_transaction(post_account.actions)
+
+    def push_transaction(self, actions):
+        trx = {
+            'max_net_usage_words': 0,
+            'max_cpu_usage_ms': 0,
+            'delay_sec': 0,
+            'context_free_actions': [],
+            'actions': actions,
+            'transaction_extensions': [],
+            'signatures': [],
+            'context_free_data': []
+        }
+        trx = {**trx, **self.get_trx_header()}
+
+        run("cleos push transaction '{}'".format(toJson(trx)))
+
+    def get_trx_header(self, seconds_ahead=30):
+        o = fromJson(get_output('cleos get info'))
+        lib = o['last_irreversible_block_num']
+        exp = parse(o['head_block_time']) + relativedelta(minutes=seconds_ahead)
+        p = fromJson(get_output('cleos get block {}'.format(lib)))
+        return {'expiration': exp.isoformat(), 'ref_block_num': lib, 'ref_block_prefix':  p['ref_block_prefix']}
 
     def create_fund_account(self):
         a = self.account_factory.get_acc_obj('telosfundacc')

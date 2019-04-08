@@ -36,12 +36,12 @@ class AccountFactory:
     def pre_sys_create(self, a):
         run(self.teclos + ' --url %s create account eosio %s %s' % (self.host_address, a.name, a.keypair.public))
 
-    def post_sys_create(self, a, net=1000, cpu=1000, ram=200, creator='eosio'):
+    def post_sys_create(self, a, net=1000, cpu=1000, ram=2000, creator='eosio'):
         cmd = self.teclos + ' --url %s system newaccount %s --transfer %s %s --stake-net \"%s\" --stake-cpu \"%s\" --buy-ram-kbytes \"%s\"'
         net = Asset(net)
         cpu = Asset(cpu)
-        ram = Asset(ram)
         run_retry(cmd % (self.host_address, creator, a.name, a.keypair.public, net, cpu, ram))
+        ram = Asset(ram)
         a.amount += cpu + net + ram
 
     #TODO: make sure the account name meetings TELOS normalized requirements
@@ -122,13 +122,16 @@ class AccountFactory:
 
             self.pre_sys_create(a)
 
-    def create_post_accounts(self, post_accounts):
+    def create_post_accounts(self, post_accounts, per_account_callback):
         for aObj in post_accounts:
             a = AttrDict(aObj)
-            a = Account(a.name, a.keypair)
+            acc = Account(a.name, a.keypair)
             if not self.wallet.contains_key(a.keypair.public):
                 self.wallet.import_key(a.keypair.private)
-            self.post_sys_create(a)
+            self.post_sys_create(acc)
+            if per_account_callback:
+                per_account_callback(a)
+
             # set contract if config exists in object
 
     def create_tip5_wallets_from_snapshot(self, path_to_csv, contract_account, min_tokens, max_tokens):
