@@ -51,8 +51,8 @@ class BootStrapper:
         if('contract' in post_account):
             self.set_contract(post_account.name, post_account.contract.path, post_account.name)
             # TODO: create trx and send it
-            self.push_transaction(post_account.contract.init)
-
+            if('init' in post_account.contract):
+                self.push_transaction(post_account.contract.init)
         if('actions' in post_account):
             self.push_transaction(post_account.actions)
 
