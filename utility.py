@@ -57,6 +57,7 @@ def run(args, isShell=True, show=True):
 
 def run_retry(args, isShell=True, num=1):
     # print(args)
+    print(args)
     o = subprocess.call(args, shell=isShell)
     if o and num <= 3:
         print('Failed retrying... ')

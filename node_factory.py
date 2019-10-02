@@ -183,7 +183,7 @@ class NodeFactory:
             self.edit_new_genesis(pair.public)
             config.set('signature-provider', self.create_sig_provider(pair))
             plugins = ['eosio::http_plugin', 'eosio::chain_plugin', 'eosio::chain_api_plugin',
-                       'eosio::producer_plugin', 'eosio::history_plugin', 'eosio::history_api_plugin'] + a_plugins
+                       'eosio::producer_plugin', 'eosio::producer_api_plugin', 'eosio::history_plugin', 'eosio::history_api_plugin'] + a_plugins
             if "eosio::mongo_db_plugin" in plugins:
                 flags['mongodb-uri'] = "mongodb://127.0.0.1:27017/EOS"
                 flags['mongodb-wipe'] = ''
@@ -212,7 +212,8 @@ class NodeFactory:
             config.set('p2p-server-address', '%s:%s' % (str(p2p_address), str(p2p_port)))
             config.set('producer-name', account.name)
             config.set('signature-provider', self.create_sig_provider(account.keypair))
-            plugins = ['eosio::producer_plugin', 'eosio::net_plugin']
+            plugins = ['eosio::http_plugin', 'eosio::producer_plugin', 'eosio::net_plugin',
+                        'eosio::producer_api_plugin', 'eosio::chain_plugin', 'eosio::chain_api_plugin' ]
             config.append('plugin', plugins)
             config.write(join(nodepath, 'config.ini'))
             copyfile(join(self.parent_dir, 'config/genesis.json'), join(nodepath, "genesis.json"))

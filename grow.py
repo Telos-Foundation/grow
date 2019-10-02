@@ -177,7 +177,7 @@ def single(producer_name, p2p_address, genesis_json_path, genesis_node_address, 
 @click.argument('path', default=os.getcwd())
 @click.option('--genesis-http-port', default=8888)
 @click.option('--genesis-p2p-port', default=9876)
-@click.option('--dist-percentage', default=60)
+@click.option('--dist-percentage', default=25)
 @click.option('--no-vote', type=bool, default=False)
 @click.option('--vote-self', type=bool, default=False)
 @click.option('--num-self-voters', type=int, default=15)
