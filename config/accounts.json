@@ -184,6 +184,37 @@
     },
     {
       "name": "sandbox",
+      "contract": {
+        "path": "/Users/hotmdev4/Desktop/drakos/smaug-contracts/contracts/build/sandbox/",
+        "init": [
+          {
+            "account": "sandbox",
+            "name": "test",
+            "authorization": [{ "actor": "sandbox", "permission": "active"}],
+            "data": {
+              "combined": {
+                "name1": "name1",
+                "name2": "name2",
+                "name3": "name3",
+                "name4": "name4"
+              }
+            }
+          }
+        ]
+      },
+      "actions": [
+        {
+          "account": "eosio.token",
+          "name": "transfer",
+          "authorization": [{"actor":  "eosio", "permission": "active"}],
+          "data": {
+            "from": "eosio",
+            "to": "sandbox",
+            "quantity": "1000.0000 TLOS",
+            "memo": ""
+          }
+        }
+      ],
       "keypair": {
         "public": "EOS5mUKpkzRFQjDvVg76KkTpdq1f7rHwAWMKxxijA1SSw8bSXJrfK",
         "private": "5Hyn6qkKYmU7HUEKhFwtQXwgw88TioE78wDq4D3kk9Fjej6pxoo"
@@ -194,6 +225,13 @@
     {
       "name": "eosio.token",
       "contract": "eosio.token",
+      "keypair": {
+        "private": "5JQdVG7Juyn5F9NBJVz5MRC7njEb4Cmz63NhqTyozFr5tEHBSUp",
+        "public": "EOS6fMCSqeKsP6YQmAvfRXAuGvC8thU7bR7DxhiDC7sEvC2uxPTCE"
+      }
+    },
+    {
+      "name": "eosio.rex",
       "keypair": {
         "private": "5JQdVG7Juyn5F9NBJVz5MRC7njEb4Cmz63NhqTyozFr5tEHBSUp",
         "public": "EOS6fMCSqeKsP6YQmAvfRXAuGvC8thU7bR7DxhiDC7sEvC2uxPTCE"
